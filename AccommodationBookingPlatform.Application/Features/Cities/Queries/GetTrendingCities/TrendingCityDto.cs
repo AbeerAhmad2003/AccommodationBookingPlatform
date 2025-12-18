@@ -6,6 +6,5 @@
         public string Name { get; set; }
         public string Country { get; set; }
         public string? ThumbnailUrl { get; set; }
-        public int BookingsCount { get; set; }
     }
 }

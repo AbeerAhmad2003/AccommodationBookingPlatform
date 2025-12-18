@@ -17,11 +17,8 @@ namespace AccommodationBookingPlatform.Application.Profiles
                 dest => dest.ThumbnailUrl,
                 opt => opt.MapFrom(src =>
                     src.Thumbnail != null ? src.Thumbnail.Url : null)
-            )
-            .ForMember(
-                dest => dest.BookingsCount,
-                opt => opt.Ignore()
             );
+
         }
 
     }

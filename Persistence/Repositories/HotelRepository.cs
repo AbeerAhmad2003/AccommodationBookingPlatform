@@ -99,6 +99,55 @@ namespace AccommodationBookingPlatform.Persistence.Repositories
             await _context.SaveChangesAsync(cancellationToken);
         }
 
+        public async Task<PaginatedList<Hotel>> GetHotelsAsync(
+    Query<Hotel> query,
+    CancellationToken ct = default)
+        {
+            IQueryable<Hotel> hotels = _context.Hotels;
+
+            if (query.Filter != null)
+                hotels = hotels.Where(query.Filter);
+
+            var totalCount = await hotels.CountAsync(ct);
+
+            var items = await hotels
+                .Skip((query.PageNumber - 1) * query.PageSize)
+                .Take(query.PageSize)
+                .AsNoTracking()
+                .ToListAsync(ct);
+
+            return new PaginatedList<Hotel>(
+                items,
+                totalCount,
+                query.PageNumber,
+                query.PageSize);
+        }
+
+        public async Task<bool> ExistsByNameAsync(string name, Guid cityId, CancellationToken ct)
+        {
+            return await _context.Hotels.AnyAsync(h => h.Name == name && h.CityId == cityId, ct);
+        }
+
+        public async Task<Hotel?> GetHotelDetailsAsync(
+     Guid hotelId,
+     CancellationToken ct = default)
+        {
+            return await _context.Hotels
+                .Include(h => h.RoomClasses)
+                .Include(h => h.Reviews)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(h => h.Id == hotelId, ct);
+        }
+
+
+        public async Task DeleteHotelAsync(Guid hotelId, CancellationToken ct)
+        {
+            var hotel = await _context.Hotels.FindAsync(new object[] { hotelId }, ct);
+            if (hotel == null) return;
+
+            _context.Hotels.Remove(hotel);
+            await _context.SaveChangesAsync(ct);
+        }
     }
 
 

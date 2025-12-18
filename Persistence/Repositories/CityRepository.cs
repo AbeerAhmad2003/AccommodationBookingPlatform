@@ -1,4 +1,6 @@
-﻿using AccommodationBookingPlatform.Application.Contracts.Persistence;
+﻿using AccommodationBookingPlatform.Application.Common.Pagination;
+using AccommodationBookingPlatform.Application.Contracts.Persistence;
+using AccommodationBookingPlatform.Domain.Common;
 using AccommodationBookingPlatform.Domain.Common.Enums;
 using AccommodationBookingPlatform.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -13,10 +15,7 @@ namespace AccommodationBookingPlatform.Persistence.Repositories
         {
             _context = context;
         }
-
-        public async Task<IReadOnlyList<City>> GetMostVisitedAsync(
-            int count,
-            CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyList<City>> GetMostVisitedAsync(int count, CancellationToken cancellationToken = default)
         {
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(count);
 
@@ -46,7 +45,40 @@ namespace AccommodationBookingPlatform.Persistence.Repositories
             return cities;
         }
 
+        public async Task<PaginatedList<City>> GetCitiesAsync(Query<City> query, CancellationToken ct = default)
+        {
+            IQueryable<City> cities = _context.Cities;
+
+            if (query.Filter != null)
+                cities = cities.Where(query.Filter);
+
+            var totalCount = await cities.CountAsync(ct);
+
+            var items = await cities
+                .Skip((query.PageNumber - 1) * query.PageSize)
+                .Take(query.PageSize)
+                .AsNoTracking()
+                .ToListAsync(ct);
+
+            return new PaginatedList<City>(
+                items,
+                totalCount,
+                query.PageNumber,
+                query.PageSize);
+        }
+
+        public async Task<bool> ExistsByNameAsync(
+        string name,
+        CancellationToken ct = default)
+        {
+            return await _context.Cities
+                .AnyAsync(c => c.Name == name, ct);
+        }
+        public async Task<int> GetHotelsCountAsync(Guid cityId, CancellationToken ct = default)
+        {
+            return await _context.Hotels
+                .CountAsync(h => h.CityId == cityId, ct);
+        }
+
     }
-
-
 }

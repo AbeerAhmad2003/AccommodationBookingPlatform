@@ -6,9 +6,19 @@ namespace AccommodationBookingPlatform.Application.Contracts.Persistence
 {
     public interface IHotelRepository : IRepository<Hotel>
     {
-        Task<PaginatedList<Hotel>> SearchAsync(Query<Hotel> query, CancellationToken cancellationToken = default);
-        Task<IEnumerable<Hotel>> GetFeaturedDealsAsync(int count, CancellationToken cancellationToken = default);
-        Task<IEnumerable<Hotel>> GetRecentlyVisitedAsync(Guid userId, int count, CancellationToken cancellationToken = default);
-        Task UpdateReviewById(Guid id, double newRating, CancellationToken cancellationToken = default);
+        // User
+        Task<PaginatedList<Hotel>> SearchAsync(Query<Hotel> query, CancellationToken ct);
+        Task<IEnumerable<Hotel>> GetFeaturedDealsAsync(int count, CancellationToken ct);
+        Task<IEnumerable<Hotel>> GetRecentlyVisitedAsync(Guid userId, int count, CancellationToken ct);
+
+        // Admin
+        Task<PaginatedList<Hotel>> GetHotelsAsync(Query<Hotel> query, CancellationToken ct);
+        Task<bool> ExistsByNameAsync(string name, Guid cityId, CancellationToken ct);
+        Task<Hotel?> GetHotelDetailsAsync(Guid hotelId, CancellationToken ct);
+        Task DeleteHotelAsync(Guid hotelId, CancellationToken ct);
+
+        // Reviews
+        Task UpdateReviewById(Guid hotelId, double newRating, CancellationToken ct);
     }
+
 }

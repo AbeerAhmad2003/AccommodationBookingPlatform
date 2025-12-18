@@ -5,7 +5,7 @@ namespace AccommodationBookingPlatform.Domain.Common
 {
     public record Query<TEntity>(
     Expression<Func<TEntity, bool>>? Filter = null,
-    SortOrder SortOrder = SortOrder.Ascending,
+    SortOrder SortOrder = SortOrder.Asc,
     string? SortColumn = null,
     int PageNumber = 1,
     int PageSize = 10

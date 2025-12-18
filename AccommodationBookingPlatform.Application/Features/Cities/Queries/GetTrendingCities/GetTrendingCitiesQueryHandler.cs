@@ -23,15 +23,10 @@ namespace AccommodationBookingPlatform.Application.Features.Cities.Queries.GetTr
             GetTrendingCitiesQuery request,
             CancellationToken cancellationToken)
         {
-            var result = await _cityRepository
-                .GetTrendingAsync(request.Count, cancellationToken);
+            var cities = await _cityRepository
+                .GetMostVisitedAsync(request.Count, cancellationToken);
 
-            return result.Select(x =>
-            {
-                var dto = _mapper.Map<TrendingCityDto>(x.City);
-                dto.BookingsCount = x.BookingsCount;
-                return dto;
-            }).ToList();
+            return _mapper.Map<IReadOnlyList<TrendingCityDto>>(cities);
         }
     }
 
