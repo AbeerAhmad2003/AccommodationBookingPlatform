@@ -1,5 +1,6 @@
 ﻿using AccommodationBookingPlatform.Application.Contracts.Infrastructure.Services;
 using AccommodationBookingPlatform.Application.Contracts.Persistence;
+using AccommodationBookingPlatform.Application.Exceptions;
 using MediatR;
 
 namespace AccommodationBookingPlatform.Application.Features.Auth.Commands.Login

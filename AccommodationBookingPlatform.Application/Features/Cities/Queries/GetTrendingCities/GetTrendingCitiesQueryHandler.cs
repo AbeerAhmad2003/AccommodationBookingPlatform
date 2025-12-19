@@ -4,8 +4,6 @@ using MediatR;
 
 namespace AccommodationBookingPlatform.Application.Features.Cities.Queries.GetTrendingCities
 {
-
-
     public class GetTrendingCitiesQueryHandler : IRequestHandler<GetTrendingCitiesQuery, IReadOnlyList<TrendingCityDto>>
     {
         private readonly ICityRepository _cityRepository;

@@ -1,5 +1,6 @@
 ﻿using AccommodationBookingPlatform.Application.Contracts.Infrastructure.Services;
 using AccommodationBookingPlatform.Application.Contracts.Persistence;
+using AccommodationBookingPlatform.Application.Exceptions;
 using AccommodationBookingPlatform.Domain.Common.Enums;
 using AccommodationBookingPlatform.Domain.Entities;
 using MediatR;
@@ -32,7 +33,8 @@ namespace AccommodationBookingPlatform.Application.Features.Auth.Commands.Regist
                 .GetByEmailAsync(request.Email, cancellationToken);
 
             if (existingUser is not null)
-                throw new ValidationException("Email already exists");
+                throw new ConflictException("Email already exists");
+
 
             // 2️⃣ Hash password
             var passwordHash = _passwordHasher.Hash(request.Password);
