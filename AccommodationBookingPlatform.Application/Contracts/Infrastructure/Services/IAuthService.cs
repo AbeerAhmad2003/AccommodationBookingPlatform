@@ -1,4 +1,4 @@
-﻿namespace AccommodationBookingPlatform.Application.Contracts.Services
+﻿namespace AccommodationBookingPlatform.Application.Contracts.Infrastructure.Services
 {
     internal interface IAuthService
     {

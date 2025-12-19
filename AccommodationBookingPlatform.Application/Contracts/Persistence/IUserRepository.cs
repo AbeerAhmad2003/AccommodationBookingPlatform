@@ -5,5 +5,9 @@ namespace AccommodationBookingPlatform.Application.Contracts.Persistence
     public interface IUserRepository : IRepository<User>
     {
         Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken);
+        Task<bool> ExistsByIdAsync(Guid id, CancellationToken cancellationToken = default);
+        Task AddAsync(User user, CancellationToken ct);
+
+
     }
 }

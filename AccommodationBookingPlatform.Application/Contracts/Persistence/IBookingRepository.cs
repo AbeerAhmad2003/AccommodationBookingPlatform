@@ -31,6 +31,10 @@ namespace AccommodationBookingPlatform.Application.Contracts.Persistence
         DateTime to,
        int requestedRooms,
        CancellationToken ct = default);
+        Task<IReadOnlyList<Booking>> GetRecentBookingsInDifferentHotelsByUserId(
+       Guid userId,
+       int count,
+       CancellationToken ct = default);
 
     }
 }

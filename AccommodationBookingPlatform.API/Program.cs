@@ -46,7 +46,9 @@ namespace AccommodationBookingPlatform.API
             })
             .WithName("GetWeatherForecast")
             .WithOpenApi();
-
+            builder.Services.AddApplicationServices();
+            builder.Services.AddPersistenceServices(builder.Configuration);
+            builder.Services.AddHttpContextAccessor();
             app.Run();
         }
     }

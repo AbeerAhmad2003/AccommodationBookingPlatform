@@ -120,6 +120,33 @@ namespace AccommodationBookingPlatform.Persistence.Repositories
 
             return availableRooms >= requestedRooms;
         }
+        public async Task<IReadOnlyList<Booking>> GetRecentBookingsInDifferentHotelsByUserId(
+       Guid userId,
+       int count,
+       CancellationToken ct = default)
+        {
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(count);
+
+            // 1️⃣ نجيب كل حجوزات اليوزر مرتبة من الأحدث للأقدم
+            var bookings = await _context.Bookings
+                .Where(b => b.UserId == userId)
+                .OrderByDescending(b => b.CreatedAtUtc)
+                .Include(b => b.Hotel)
+                    .ThenInclude(h => h.City)
+                .Include(b => b.Hotel)
+                    .ThenInclude(h => h.Thumbnail)
+                .AsNoTracking()
+                .ToListAsync(ct);
+
+            // 2️⃣ نختار حجز واحد فقط لكل فندق (أحدث حجز)
+            var distinctBookings = bookings
+                .GroupBy(b => b.HotelId)
+                .Select(g => g.First())
+                .Take(count)
+                .ToList();
+
+            return distinctBookings;
+        }
 
 
 
