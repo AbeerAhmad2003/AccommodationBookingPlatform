@@ -5,7 +5,6 @@ namespace AccommodationBookingPlatform.Application.Features.Hotels.Queries.GetRe
     public class GetRecentlyVisitedHotelsQuery
     : IRequest<IEnumerable<RecentlyVisitedHotelDto>>
     {
-        public Guid UserId { get; init; }
         public int Count { get; init; } = 5;
     }
 }

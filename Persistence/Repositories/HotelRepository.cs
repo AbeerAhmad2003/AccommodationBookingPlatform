@@ -16,48 +16,43 @@ namespace AccommodationBookingPlatform.Persistence.Repositories
         {
             _context = context;
         }
-
         public async Task<PaginatedList<Hotel>> SearchAsync(
             Query<Hotel> query,
             CancellationToken cancellationToken = default)
         {
-            // 1️⃣ base query
-            IQueryable<Hotel> hotelsQuery = _context.Hotels.AsQueryable();
+            IQueryable<Hotel> hotelsQuery = _context.Hotels
+                .Include(h => h.City)
+                .Include(h => h.Thumbnail)
+                .Include(h => h.RoomClasses)
+                .AsQueryable();
 
-            // 2️⃣ filter
             if (query.Filter != null)
-            {
                 hotelsQuery = hotelsQuery.Where(query.Filter);
-            }
 
-            // 3️⃣ total count (قبل الباجينيشن)
             var totalCount = await hotelsQuery.CountAsync(cancellationToken);
 
-            // 4️⃣ sorting (لو عندك extension)
             if (!string.IsNullOrWhiteSpace(query.SortColumn))
             {
-                var sortExpression =
-                  HotelSortingExpressions.Get(query.SortColumn);
+                var sortExpression = HotelSortingExpressions.Get(query.SortColumn);
 
                 hotelsQuery = query.SortOrder == SortOrder.Desc
                     ? hotelsQuery.OrderByDescending(sortExpression)
                     : hotelsQuery.OrderBy(sortExpression);
             }
 
-            // 5️⃣ pagination
             var items = await hotelsQuery
                 .Skip((query.PageNumber - 1) * query.PageSize)
                 .Take(query.PageSize)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
-            // 6️⃣ رجوع PaginatedList
             return new PaginatedList<Hotel>(
                 items,
                 totalCount,
                 query.PageNumber,
                 query.PageSize);
         }
+
 
         public async Task<IEnumerable<Hotel>> GetFeaturedDealsAsync(
             int count,

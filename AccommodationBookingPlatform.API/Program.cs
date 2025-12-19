@@ -1,3 +1,7 @@
+﻿
+using AccommodationBookingPlatform.Application;
+using AccommodationBookingPlatform.Infrastructure;
+using AccommodationBookingPlatform.Persistence;
 
 namespace AccommodationBookingPlatform.API
 {
@@ -7,48 +11,61 @@ namespace AccommodationBookingPlatform.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-            builder.Services.AddAuthorization();
+            // *************************************
+            // Register Layers
+            // *************************************
+            builder.Services.AddApplicationServices();
+            builder.Services.AddPersistenceServices(builder.Configuration);
+            builder.Services.AddInfrastructureServices(builder.Configuration);
 
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+            // *************************************
+            // Controllers
+            // *************************************
+            builder.Services.AddControllers();
+
+            // *************************************
+            // Swagger
+            // *************************************
             builder.Services.AddEndpointsApiExplorer();
-            //builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen();
+
+            // *************************************
+            // HttpContext Accessor (for CurrentUserService)
+            // *************************************
+            builder.Services.AddHttpContextAccessor();
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
-            //if (app.Environment.IsDevelopment())
-            //{
-            //    app.UseSwagger();
-            //    app.UseSwaggerUI();
-            //}
+            // *************************************
+            // Swagger UI
+            // *************************************
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
 
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json",
+                        "Accommodation Booking API v1");
+
+                    // يجعل Swagger على الرابط الرئيسي مباشرةً
+                    c.RoutePrefix = string.Empty;
+                });
+            }
+
+            // *************************************
+            // Middlewares
+            // *************************************
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
-            var summaries = new[]
-            {
-                "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-            };
+            // *************************************
+            // Controllers Mapping
+            // *************************************
+            app.MapControllers();
 
-            app.MapGet("/weatherforecast", (HttpContext httpContext) =>
-            {
-                var forecast = Enumerable.Range(1, 5).Select(index =>
-                    new WeatherForecast
-                    {
-                        Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                        TemperatureC = Random.Shared.Next(-20, 55),
-                        Summary = summaries[Random.Shared.Next(summaries.Length)]
-                    })
-                    .ToArray();
-                return forecast;
-            })
-            .WithName("GetWeatherForecast")
-            .WithOpenApi();
-            builder.Services.AddApplicationServices();
-            builder.Services.AddPersistenceServices(builder.Configuration);
-            builder.Services.AddHttpContextAccessor();
             app.Run();
         }
     }

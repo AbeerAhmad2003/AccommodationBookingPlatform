@@ -17,7 +17,7 @@ namespace AccommodationBookingPlatform.Infrastructure
                 configuration.GetSection("JwtSettings"));
             services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
             services.AddScoped<IPasswordHasher, PasswordHasher>();
-
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
             return services;
         }
     }
