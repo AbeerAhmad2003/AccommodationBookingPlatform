@@ -17,13 +17,15 @@ namespace AccommodationBookingPlatform.Persistence.Repositories
             _context = context;
         }
         public async Task<PaginatedList<Hotel>> SearchAsync(
-            Query<Hotel> query,
-            CancellationToken cancellationToken = default)
+     Query<Hotel> query,
+     CancellationToken cancellationToken = default)
         {
             IQueryable<Hotel> hotelsQuery = _context.Hotels
                 .Include(h => h.City)
                 .Include(h => h.Thumbnail)
                 .Include(h => h.RoomClasses)
+                    .ThenInclude(rc => rc.Rooms)
+                .Include(h => h.Bookings)
                 .AsQueryable();
 
             if (query.Filter != null)
@@ -52,8 +54,6 @@ namespace AccommodationBookingPlatform.Persistence.Repositories
                 query.PageNumber,
                 query.PageSize);
         }
-
-
         public async Task<IEnumerable<Hotel>> GetFeaturedDealsAsync(
             int count,
             CancellationToken cancellationToken = default)
@@ -124,17 +124,25 @@ namespace AccommodationBookingPlatform.Persistence.Repositories
         }
 
         public async Task<Hotel?> GetHotelDetailsAsync(
-     Guid hotelId,
-     CancellationToken ct = default)
+         Guid hotelId,
+         CancellationToken ct = default)
         {
             return await _context.Hotels
+                .Include(h => h.City)
+                .Include(h => h.Thumbnail)
+                .Include(h => h.Gallery)
                 .Include(h => h.RoomClasses)
+                    .ThenInclude(rc => rc.Amenities)
+                .Include(h => h.RoomClasses)
+                    .ThenInclude(rc => rc.Gallery)
+                .Include(h => h.RoomClasses)
+                    .ThenInclude(rc => rc.Rooms)
                 .Include(h => h.Reviews)
+                    .ThenInclude(r => r.Guest)
+                .Include(h => h.Bookings)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(h => h.Id == hotelId, ct);
         }
-
-
         public async Task DeleteHotelAsync(Guid hotelId, CancellationToken ct)
         {
             var hotel = await _context.Hotels.FindAsync(new object[] { hotelId }, ct);

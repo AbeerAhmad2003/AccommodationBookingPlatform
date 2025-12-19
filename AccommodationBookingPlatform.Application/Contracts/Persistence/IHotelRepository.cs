@@ -19,6 +19,7 @@ namespace AccommodationBookingPlatform.Application.Contracts.Persistence
 
         // Reviews
         Task UpdateReviewById(Guid hotelId, double newRating, CancellationToken ct);
+
     }
 
 }

@@ -8,7 +8,7 @@ using MediatR;
 namespace AccommodationBookingPlatform.Application.Features.Hotels.Queries.SearchHotels
 {
     public class SearchHotelsQueryHandler
-    : IRequestHandler<SearchHotelsQuery, PaginatedList<HotelSearchResultDto>>
+     : IRequestHandler<SearchHotelsQuery, PaginatedList<HotelSearchResultDto>>
     {
         private readonly IHotelRepository _hotelRepository;
         private readonly IMapper _mapper;
@@ -34,21 +34,50 @@ namespace AccommodationBookingPlatform.Application.Features.Hotels.Queries.Searc
 
                 Filter = h =>
                     (request.CityId == null || h.CityId == request.CityId) &&
-                    (string.IsNullOrWhiteSpace(request.CityName) ||
-                        h.City.Name.Contains(request.CityName)) &&
+                    (string.IsNullOrWhiteSpace(request.CityName)
+                        || h.City.Name.Contains(request.CityName)) &&
                     (!request.MinStars.HasValue || h.ReviewsRating >= request.MinStars) &&
                     (!request.MaxStars.HasValue || h.ReviewsRating <= request.MaxStars)
             };
 
             var hotelsPaged = await _hotelRepository.SearchAsync(query, cancellationToken);
 
-            var mappedItems = _mapper.Map<List<HotelSearchResultDto>>(hotelsPaged.Items);
+            var hotels = hotelsPaged.Items.ToList();
+
+            // 🔥 Availability Check
+            if (request.CheckIn.HasValue && request.CheckOut.HasValue && request.Rooms > 0)
+            {
+                var checkIn = request.CheckIn.Value;
+                var checkOut = request.CheckOut.Value;
+
+                if (checkIn < checkOut)
+                {
+                    hotels = hotels
+                        .Where(h =>
+                        {
+                            var totalRooms = h.RoomClasses.Sum(rc => rc.Rooms.Count);
+
+                            var bookedRooms = h.Bookings
+                                .Where(b =>
+                                    b.CheckInDate < checkOut &&
+                                    b.CheckOutDate > checkIn)
+                                .Sum(b => b.RoomsCount);
+
+                            var availableRooms = totalRooms - bookedRooms;
+
+                            return availableRooms >= request.Rooms;
+                        })
+                        .ToList();
+                }
+            }
+
+            var mappedItems = _mapper.Map<List<HotelSearchResultDto>>(hotels);
 
             return new PaginatedList<HotelSearchResultDto>(
                 mappedItems,
-                hotelsPaged.TotalCount,
-                hotelsPaged.PageNumber,
-                hotelsPaged.PageSize);
+                mappedItems.Count,
+                request.PageNumber,
+                request.PageSize);
         }
     }
 

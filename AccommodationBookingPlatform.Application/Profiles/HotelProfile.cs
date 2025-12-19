@@ -1,4 +1,5 @@
 ﻿using AccommodationBookingPlatform.Application.Features.Hotels.Queries.GetFeaturedDeals;
+using AccommodationBookingPlatform.Application.Features.Hotels.Queries.GetHotelDetails;
 using AccommodationBookingPlatform.Application.Features.Hotels.Queries.GetRecentlyVisitedHotel;
 using AccommodationBookingPlatform.Application.Features.Hotels.Queries.SearchHotels;
 using AccommodationBookingPlatform.Domain.Entities;
@@ -60,6 +61,39 @@ namespace AccommodationBookingPlatform.Application.Profiles
                             : 0))
                 .ForMember(d => d.Rating,
                     o => o.MapFrom(s => s.ReviewsRating));
+            // ⭐ Hotel Details
+            CreateMap<Hotel, HotelDetailsDto>()
+                .ForMember(d => d.CityName,
+                    o => o.MapFrom(s => s.City.Name))
+                .ForMember(d => d.Country,
+                    o => o.MapFrom(s => s.City.Country))
+                .ForMember(d => d.ThumbnailUrl,
+                    o => o.MapFrom(s => s.Thumbnail != null ? s.Thumbnail.Url : null))
+                .ForMember(d => d.GalleryUrls,
+                    o => o.MapFrom(s => s.Gallery.Select(img => img.Url)))
+                .ForMember(d => d.ReviewsCount,
+                    o => o.MapFrom(s => s.ReviewsCount))
+                .ForMember(d => d.ReviewsRating,
+                    o => o.MapFrom(s => s.ReviewsRating))
+                .ForMember(d => d.RoomClasses,
+                    o => o.MapFrom(s => s.RoomClasses))
+                .ForMember(d => d.Reviews,
+                    o => o.MapFrom(s => s.Reviews));
+
+            CreateMap<RoomClass, RoomClassDto>()
+                .ForMember(d => d.RoomType,
+                    o => o.MapFrom(s => s.RoomType.ToString()))
+                .ForMember(d => d.Amenities,
+                    o => o.MapFrom(s => s.Amenities.Select(a => a.Name)))
+                .ForMember(d => d.Images,
+                    o => o.MapFrom(s => s.Gallery.Select(img => img.Url)));
+
+            CreateMap<Review, ReviewDto>()
+                .ForMember(d => d.GuestName,
+                    o => o.MapFrom(s => s.Guest.FirstName + " " + s.Guest.LastName))
+                .ForMember(d => d.Rating,
+                    o => o.MapFrom(s => (int)s.Rating));
+
         }
     }
 }
