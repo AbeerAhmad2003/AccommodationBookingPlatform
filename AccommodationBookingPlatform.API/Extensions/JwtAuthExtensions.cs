@@ -1,10 +1,12 @@
-﻿using AccommodationBookingPlatform.Application.Common.Settings;
+﻿
+using global::AccommodationBookingPlatform.Application.Common.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-namespace AccommodationBookingPlatform.API
+namespace AccommodationBookingPlatform.API.Extensions
 {
+
     public static class JwtAuthenticationExtensions
     {
         public static IServiceCollection AddJwtAuthentication(
@@ -42,3 +44,5 @@ namespace AccommodationBookingPlatform.API
         }
     }
 }
+
+

@@ -1,4 +1,5 @@
-﻿
+﻿using AccommodationBookingPlatform.API.Extensions;
+using AccommodationBookingPlatform.API.Middleware;
 using AccommodationBookingPlatform.Application;
 using AccommodationBookingPlatform.Infrastructure;
 using AccommodationBookingPlatform.Persistence;
@@ -19,6 +20,11 @@ namespace AccommodationBookingPlatform.API
             builder.Services.AddInfrastructureServices(builder.Configuration);
 
             // *************************************
+            // JWT Authentication
+            // *************************************
+            builder.Services.AddJwtAuthentication(builder.Configuration);
+
+            // *************************************
             // Controllers
             // *************************************
             builder.Services.AddControllers();
@@ -30,7 +36,7 @@ namespace AccommodationBookingPlatform.API
             builder.Services.AddSwaggerGen();
 
             // *************************************
-            // HttpContext Accessor (for CurrentUserService)
+            // HttpContext Accessor
             // *************************************
             builder.Services.AddHttpContextAccessor();
 
@@ -42,13 +48,11 @@ namespace AccommodationBookingPlatform.API
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
-
                 app.UseSwaggerUI(c =>
                 {
                     c.SwaggerEndpoint("/swagger/v1/swagger.json",
                         "Accommodation Booking API v1");
 
-                    // يجعل Swagger على الرابط الرئيسي مباشرةً
                     c.RoutePrefix = string.Empty;
                 });
             }
@@ -57,6 +61,8 @@ namespace AccommodationBookingPlatform.API
             // Middlewares
             // *************************************
             app.UseHttpsRedirection();
+
+            app.UseMiddleware<ExceptionHandlingMiddleware>();
 
             app.UseAuthentication();
             app.UseAuthorization();

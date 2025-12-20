@@ -1,4 +1,5 @@
 ﻿using AccommodationBookingPlatform.Application.Contracts.Persistence;
+using AccommodationBookingPlatform.Application.Exceptions;
 using AccommodationBookingPlatform.Domain.Entities;
 using AutoMapper;
 using MediatR;

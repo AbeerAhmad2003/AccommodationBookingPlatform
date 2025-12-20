@@ -12,7 +12,6 @@ namespace AccommodationBookingPlatform.Infrastructure
             this IServiceCollection services,
             IConfiguration configuration)
         {
-
             services.Configure<JwtSettings>(
                 configuration.GetSection("JwtSettings"));
             services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
