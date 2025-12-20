@@ -1,5 +1,6 @@
 ﻿using AccommodationBookingPlatform.Application.Common.Settings;
 using AccommodationBookingPlatform.Application.Contracts.Infrastructure.Services;
+using AccommodationBookingPlatform.Application.Contracts.Services.Pricing;
 using AccommodationBookingPlatform.Infrastrucutre;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +18,8 @@ namespace AccommodationBookingPlatform.Infrastructure
             services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
             services.AddScoped<IPasswordHasher, PasswordHasher>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
+            services.AddScoped<IFeaturedDealCalculator, FeaturedDealCalculator>();
+
             return services;
         }
     }

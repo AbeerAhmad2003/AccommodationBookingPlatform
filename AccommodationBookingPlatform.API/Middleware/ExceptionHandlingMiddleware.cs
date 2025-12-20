@@ -2,6 +2,7 @@
 using System.Net;
 using System.Text.Json;
 
+
 namespace AccommodationBookingPlatform.API.Middleware
 {
     public class ExceptionHandlingMiddleware
@@ -33,10 +34,22 @@ namespace AccommodationBookingPlatform.API.Middleware
 
             switch (exception)
             {
-                case ValidationException ve:
+                case AccommodationBookingPlatform.Application.Exceptions.ValidationException ve:
                     statusCode = HttpStatusCode.BadRequest;
                     title = "Validation error";
                     errors = ve.Errors;
+                    break;
+
+                case FluentValidation.ValidationException fv:
+                    statusCode = HttpStatusCode.BadRequest;
+                    title = "Validation error";
+
+                    errors = fv.Errors
+                        .GroupBy(e => e.PropertyName)
+                        .ToDictionary(
+                            g => g.Key,
+                            g => g.Select(e => e.ErrorMessage).ToArray()
+                        );
                     break;
 
                 case NotFoundException:
@@ -63,6 +76,8 @@ namespace AccommodationBookingPlatform.API.Middleware
                     title = "Internal server error";
                     break;
             }
+
+
 
             var response = new
             {

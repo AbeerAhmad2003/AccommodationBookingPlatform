@@ -34,6 +34,9 @@ namespace AccommodationBookingPlatform.Persistence.Configurations
 
             builder.Property(u => u.PhoneNumber)
                 .HasMaxLength(20);
+            builder.Property(u => u.PhoneNumber)
+       .HasMaxLength(20)
+       .IsRequired(false);
 
             // Enum Role stored as string
             builder.Property(u => u.Role)

@@ -3,6 +3,7 @@ using AccommodationBookingPlatform.API.Middleware;
 using AccommodationBookingPlatform.Application;
 using AccommodationBookingPlatform.Infrastructure;
 using AccommodationBookingPlatform.Persistence;
+using Microsoft.OpenApi.Models;
 
 namespace AccommodationBookingPlatform.API
 {
@@ -33,8 +34,27 @@ namespace AccommodationBookingPlatform.API
             // Swagger
             // *************************************
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
-
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "CarRentalAPI", Version = "v1" });
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    In = ParameterLocation.Header,
+                    Description = "Please enter token with Bearer prefix",
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+                    },
+                    new string[]{}
+                }
+            });
+            });
             // *************************************
             // HttpContext Accessor
             // *************************************
@@ -47,6 +67,7 @@ namespace AccommodationBookingPlatform.API
             // *************************************
             if (app.Environment.IsDevelopment())
             {
+
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
                 {
@@ -55,8 +76,8 @@ namespace AccommodationBookingPlatform.API
 
                     c.RoutePrefix = string.Empty;
                 });
-            }
 
+            }
             // *************************************
             // Middlewares
             // *************************************
