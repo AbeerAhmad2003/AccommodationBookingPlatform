@@ -4,7 +4,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AccommodationBookingPlatform.Persistence.Repositories
 {
-    public class RoomRepository : BaseRepository<Room>, IRoomRepository
+    public class RoomRepository
+     : BaseRepository<Room>, IRoomRepository
     {
         private readonly AccommodationBookingDbContext _context;
 
@@ -21,6 +22,30 @@ namespace AccommodationBookingPlatform.Persistence.Repositories
             return await _context.Rooms
                 .CountAsync(r => r.RoomClass.HotelId == hotelId, ct);
         }
+
+        public async Task<bool> ExistsNumberInRoomClassAsync(
+            Guid roomClassId,
+            string number,
+            CancellationToken ct = default)
+        {
+            return await _context.Rooms
+                .AnyAsync(r =>
+                    r.RoomClassId == roomClassId &&
+                    r.Number == number,
+                    ct);
+        }
+
+        public async Task<IReadOnlyList<Room>> GetByRoomClassIdAsync(
+            Guid roomClassId,
+            CancellationToken ct = default)
+        {
+            return await _context.Rooms
+                .Where(r => r.RoomClassId == roomClassId)
+                .Include(r => r.RoomClass)
+                .AsNoTracking()
+                .ToListAsync(ct);
+        }
     }
+
 
 }
