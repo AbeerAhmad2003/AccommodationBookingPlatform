@@ -8,7 +8,7 @@ using MediatR;
 namespace AccommodationBookingPlatform.Application.Features.RoomClasses.Commands.CreateRoomClass
 {
     public class CreateRoomClassCommandHandler
-       : IRequestHandler<CreateRoomClassCommand, RoomClassDto>
+       : IRequestHandler<CreateRoomClassCommand>
     {
         private readonly IRoomClassRepository _roomClassRepository;
         private readonly IHotelRepository _hotelRepository;

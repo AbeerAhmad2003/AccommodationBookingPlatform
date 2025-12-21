@@ -22,7 +22,7 @@ namespace AccommodationBookingPlatform.Persistence.Repositories
         {
             IQueryable<Hotel> hotelsQuery = _context.Hotels
                 .Include(h => h.City)
-                .Include(h => h.Thumbnail)
+                //.Include(h => h.Thumbnail)
                 .Include(h => h.RoomClasses)
                     .ThenInclude(rc => rc.Rooms)
                 .Include(h => h.Bookings)
