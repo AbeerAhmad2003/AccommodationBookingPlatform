@@ -151,7 +151,19 @@ namespace AccommodationBookingPlatform.Persistence.Repositories
             _context.Hotels.Remove(hotel);
             await _context.SaveChangesAsync(ct);
         }
+        public async Task<bool> ExistsAtLocationAsync(
+    Guid cityId,
+    double longitude,
+    double latitude,
+    double tolerance = 0.0005,
+    CancellationToken ct = default)
+        {
+            return await _context.Hotels.AnyAsync(h =>
+                h.CityId == cityId &&
+                Math.Abs(h.Longitude - longitude) <= tolerance &&
+                Math.Abs(h.Latitude - latitude) <= tolerance,
+                ct);
+        }
+
     }
-
-
 }

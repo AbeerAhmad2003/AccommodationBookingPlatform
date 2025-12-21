@@ -20,6 +20,9 @@ namespace AccommodationBookingPlatform.Application.Contracts.Persistence
         // Reviews
         Task UpdateReviewById(Guid hotelId, double newRating, CancellationToken ct);
 
+        Task<bool> ExistsAtLocationAsync(Guid cityId, double longitude, double latitude, double tolerance = 0.0005,
+        CancellationToken ct = default);
+
     }
 
 }

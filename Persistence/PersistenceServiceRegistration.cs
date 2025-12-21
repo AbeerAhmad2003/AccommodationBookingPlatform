@@ -26,6 +26,8 @@ namespace AccommodationBookingPlatform.Persistence
             services.AddScoped<IBookingRepository, BookingRepository>();
             services.AddScoped<IRoomRepository, RoomRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IOwnerRepository, OwnerRepository>();
+
 
 
             // Supporting Repositories (إذا موجودة)

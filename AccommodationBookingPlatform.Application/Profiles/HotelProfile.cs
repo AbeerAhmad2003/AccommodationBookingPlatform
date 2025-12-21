@@ -1,4 +1,5 @@
-﻿using AccommodationBookingPlatform.Application.Features.Hotels.Queries.GetFeaturedDeals;
+﻿using AccommodationBookingPlatform.Application.Features.Hotels.Common;
+using AccommodationBookingPlatform.Application.Features.Hotels.Queries.GetFeaturedDeals;
 using AccommodationBookingPlatform.Application.Features.Hotels.Queries.GetHotelDetails;
 using AccommodationBookingPlatform.Application.Features.Hotels.Queries.GetRecentlyVisitedHotel;
 using AccommodationBookingPlatform.Application.Features.Hotels.Queries.SearchHotels;
@@ -93,6 +94,20 @@ namespace AccommodationBookingPlatform.Application.Profiles
                     o => o.MapFrom(s => s.Guest.FirstName + " " + s.Guest.LastName))
                 .ForMember(d => d.Rating,
                     o => o.MapFrom(s => (int)s.Rating));
+
+            CreateMap<Hotel, HotelDto>()
+          .ForMember(d => d.CityName,
+              opt => opt.MapFrom(s => s.City != null ? s.City.Name : string.Empty))
+          .ForMember(d => d.OwnerName,
+              opt => opt.MapFrom(s =>
+                  s.Owner != null
+                      ? s.Owner.FirstName + " " + s.Owner.LastName
+                      : string.Empty))
+          .ForMember(d => d.RoomsCount,
+              opt => opt.MapFrom(s =>
+                  s.RoomClasses != null
+                      ? s.RoomClasses.Sum(rc => rc.Rooms.Count)
+                      : 0));
 
         }
     }
