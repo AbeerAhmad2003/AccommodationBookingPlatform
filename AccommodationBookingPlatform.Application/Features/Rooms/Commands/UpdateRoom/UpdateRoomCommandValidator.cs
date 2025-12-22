@@ -1,12 +1,15 @@
 ﻿using FluentValidation;
 
-namespace AccommodationBookingPlatform.Application.Features.Rooms.Commands.CreateRoom
+namespace AccommodationBookingPlatform.Application.Features.Rooms.Commands.UpdateRoom
 {
-    public class CreateRoomCommandValidator
-     : AbstractValidator<CreateRoomCommand>
+    public class UpdateRoomCommandValidator
+      : AbstractValidator<UpdateRoomCommand>
     {
-        public CreateRoomCommandValidator()
+        public UpdateRoomCommandValidator()
         {
+            RuleFor(x => x.Id)
+                .NotEmpty();
+
             RuleFor(x => x.RoomClassId)
                 .NotEmpty()
                 .WithMessage("Room class id is required.");
@@ -18,6 +21,5 @@ namespace AccommodationBookingPlatform.Application.Features.Rooms.Commands.Creat
                 .WithMessage("Room number cannot exceed 20 characters.");
         }
     }
-
 
 }

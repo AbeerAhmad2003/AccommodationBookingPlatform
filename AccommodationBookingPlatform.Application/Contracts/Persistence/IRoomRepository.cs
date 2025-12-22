@@ -16,5 +16,10 @@ namespace AccommodationBookingPlatform.Application.Contracts.Persistence
         Task<IReadOnlyList<Room>> GetByRoomClassIdAsync(
             Guid roomClassId,
             CancellationToken ct = default);
+        Task<bool> ExistsNumberInRoomClassForAnotherRoomAsync(
+    Guid roomClassId,
+    string number,
+    Guid roomId,
+    CancellationToken cancellationToken);
     }
 }

@@ -1,9 +1,11 @@
-﻿using AccommodationBookingPlatform.Application.Features.RoomClasses.Commands.CreateRoomClass;
+﻿using AccommodationBookingPlatform.API.Contracts.RoomClasses;
+using AccommodationBookingPlatform.Application.Features.RoomClasses.Commands.CreateRoomClass;
 using AccommodationBookingPlatform.Application.Features.RoomClasses.Commands.DeleteRoomClass;
 using AccommodationBookingPlatform.Application.Features.RoomClasses.Commands.UpdateRoomClass;
 using AccommodationBookingPlatform.Application.Features.RoomClasses.Common;
 using AccommodationBookingPlatform.Application.Features.RoomClasses.Queries.GetRoomClassById;
 using AccommodationBookingPlatform.Application.Features.RoomClasses.Queries.GetRoomClassesByHotel;
+using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,10 +18,12 @@ namespace AccommodationBookingPlatform.API.Controllers.Admin
     public class RoomClassesController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly IMapper _mapper;
 
-        public RoomClassesController(IMediator mediator)
+        public RoomClassesController(IMediator mediator, IMapper mapper)
         {
             _mediator = mediator;
+            _mapper = mapper;
         }
 
         // GET /api/admin/roomclasses/{id}
@@ -40,12 +44,13 @@ namespace AccommodationBookingPlatform.API.Controllers.Admin
 
         // POST /api/admin/roomclasses
         [HttpPost]
-        public async Task<ActionResult<RoomClassDto>> Create([FromBody] RoomClassInputDto dto)
+        public async Task<ActionResult<RoomClassDto>> Create(CreateRoomClassRequest request)
         {
-            var result = await _mediator.Send(new CreateRoomClassCommand(dto));
+            var command = _mapper.Map<CreateRoomClassCommand>(request);
 
-            return CreatedAtAction(
-                nameof(GetById),
+            var result = await _mediator.Send(command);
+
+            return CreatedAtAction(nameof(GetById),
                 new { id = result.Id },
                 result);
         }
@@ -54,12 +59,15 @@ namespace AccommodationBookingPlatform.API.Controllers.Admin
         [HttpPut("{id:guid}")]
         public async Task<ActionResult<RoomClassDto>> Update(
             Guid id,
-            [FromBody] UpdateRoomClassCommand command)
+            UpdateRoomClassRequest request)
         {
-            if (id != command.Id)
+            if (id != request.Id)
                 return BadRequest("Route id does not match body id.");
 
+            var command = _mapper.Map<UpdateRoomClassCommand>(request);
+
             var result = await _mediator.Send(command);
+
             return Ok(result);
         }
 

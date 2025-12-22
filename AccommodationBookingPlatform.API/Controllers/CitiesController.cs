@@ -1,8 +1,11 @@
-﻿using AccommodationBookingPlatform.Application.Features.Cities.Commands.CreateCity;
+﻿using AccommodationBookingPlatform.API.Contracts.Cities;
+using AccommodationBookingPlatform.Application.Features.Cities.Commands.CreateCity;
 using AccommodationBookingPlatform.Application.Features.Cities.Commands.DeleteCity;
 using AccommodationBookingPlatform.Application.Features.Cities.Commands.UpdateCity;
 using AccommodationBookingPlatform.Application.Features.Cities.Queries.GetCities;
 using AccommodationBookingPlatform.Application.Features.Cities.Queries.GetCityById;
+using AccommodationBookingPlatform.Application.Features.Cities.Queries.GetTrendingCities;
+using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,10 +18,12 @@ namespace AccommodationBookingPlatform.API.Controllers
     public class CitiesController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly IMapper _mapper;
 
-        public CitiesController(IMediator mediator)
+        public CitiesController(IMediator mediator, IMapper mapper)
         {
             _mediator = mediator;
+            _mapper = mapper;
         }
 
         // ================================
@@ -43,7 +48,6 @@ namespace AccommodationBookingPlatform.API.Controllers
         public async Task<IActionResult> GetById(Guid id)
         {
             var result = await _mediator.Send(new GetCityByIdQuery(id));
-
             return Ok(result);
         }
 
@@ -51,9 +55,12 @@ namespace AccommodationBookingPlatform.API.Controllers
         // CREATE City
         // ================================
         [HttpPost]
-        public async Task<IActionResult> Create(CreateCityCommand command)
+        public async Task<IActionResult> Create(CreateCityRequest request)
         {
+            var command = _mapper.Map<CreateCityCommand>(request);
+
             var result = await _mediator.Send(command);
+
             return CreatedAtAction(nameof(GetById),
                 new { id = result.Id }, result);
         }
@@ -62,12 +69,15 @@ namespace AccommodationBookingPlatform.API.Controllers
         // UPDATE City
         // ================================
         [HttpPut("{id:guid}")]
-        public async Task<IActionResult> Update(Guid id, UpdateCityCommand command)
+        public async Task<IActionResult> Update(Guid id, UpdateCityRequest request)
         {
-            if (id != command.Id)
+            if (id != request.Id)
                 return BadRequest("Id in route and body must match");
 
+            var command = _mapper.Map<UpdateCityCommand>(request);
+
             var result = await _mediator.Send(command);
+
             return Ok(result);
         }
 
@@ -79,6 +89,16 @@ namespace AccommodationBookingPlatform.API.Controllers
         {
             await _mediator.Send(new DeleteCityCommand(id));
             return NoContent();
+        }
+
+        // ================================
+        // GET Trending Cities
+        // ================================
+        [HttpGet("trending")]
+        public async Task<IActionResult> Trending([FromQuery] int count = 5)
+        {
+            var result = await _mediator.Send(new GetTrendingCitiesQuery(count));
+            return Ok(result);
         }
     }
 }

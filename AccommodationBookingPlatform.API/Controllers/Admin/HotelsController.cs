@@ -1,8 +1,10 @@
-﻿using AccommodationBookingPlatform.Application.Features.Hotels.Commands.CreateHotel;
+﻿using AccommodationBookingPlatform.API.Contracts.Hotels;
+using AccommodationBookingPlatform.Application.Features.Hotels.Commands.CreateHotel;
 using AccommodationBookingPlatform.Application.Features.Hotels.Commands.DeleteHotel;
 using AccommodationBookingPlatform.Application.Features.Hotels.Commands.UpdateHotel;
 using AccommodationBookingPlatform.Application.Features.Hotels.Queries.GetHotelById;
 using AccommodationBookingPlatform.Application.Features.Hotels.Queries.GetHotels;
+using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,15 +17,15 @@ namespace AccommodationBookingPlatform.API.Controllers.Admin
     public class HotelsController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly IMapper _mapper;
 
-        public HotelsController(IMediator mediator)
+        public HotelsController(IMediator mediator, IMapper mapper)
         {
             _mediator = mediator;
+            _mapper = mapper;
         }
 
-        // ============================
-        // GET /api/admin/hotels
-        // ============================
+        // GET
         [HttpGet]
         public async Task<IActionResult> GetHotels(
             [FromQuery] int pageNumber = 1,
@@ -36,9 +38,7 @@ namespace AccommodationBookingPlatform.API.Controllers.Admin
             return Ok(result);
         }
 
-        // ============================
-        // GET /api/admin/hotels/{id}
-        // ============================
+        // GET BY ID
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetHotelById(Guid id)
         {
@@ -46,37 +46,34 @@ namespace AccommodationBookingPlatform.API.Controllers.Admin
             return Ok(result);
         }
 
-        // ============================
-        // POST /api/admin/hotels
-        // ============================
+        // CREATE
         [HttpPost]
-        public async Task<IActionResult> CreateHotel([FromBody] CreateHotelCommand command)
+        public async Task<IActionResult> CreateHotel(CreateHotelRequest request)
         {
+            var command = _mapper.Map<CreateHotelCommand>(request);
+
             var result = await _mediator.Send(command);
 
-            return CreatedAtAction(
-                nameof(GetHotelById),
+            return CreatedAtAction(nameof(GetHotelById),
                 new { id = result.Id },
                 result);
         }
 
-        // ============================
-        // PUT /api/admin/hotels/{id}
-        // ============================
+        // UPDATE
         [HttpPut("{id:guid}")]
-        public async Task<IActionResult> UpdateHotel(Guid id, [FromBody] UpdateHotelCommand command)
+        public async Task<IActionResult> UpdateHotel(Guid id, UpdateHotelRequest request)
         {
-            if (id != command.Id)
+            if (id != request.Id)
                 return BadRequest("Route id does not match request body id.");
+
+            var command = _mapper.Map<UpdateHotelCommand>(request);
 
             var result = await _mediator.Send(command);
 
             return Ok(result);
         }
 
-        // ============================
-        // DELETE /api/admin/hotels/{id}
-        // ============================
+        // DELETE
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> DeleteHotel(Guid id)
         {

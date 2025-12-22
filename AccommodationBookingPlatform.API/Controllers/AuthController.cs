@@ -1,5 +1,7 @@
-﻿using AccommodationBookingPlatform.Application.Features.Auth.Commands.Login;
+﻿using AccommodationBookingPlatform.API.Contracts.Auth;
+using AccommodationBookingPlatform.Application.Features.Auth.Commands.Login;
 using AccommodationBookingPlatform.Application.Features.Auth.Commands.Register;
+using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,10 +13,12 @@ namespace AccommodationBookingPlatform.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly IMapper _mapper;
 
-        public AuthController(IMediator mediator)
+        public AuthController(IMediator mediator, IMapper mapper)
         {
             _mediator = mediator;
+            _mapper = mapper;
         }
 
         /// <summary>
@@ -23,11 +27,14 @@ namespace AccommodationBookingPlatform.API.Controllers
         [HttpPost("register")]
         [AllowAnonymous]
         public async Task<ActionResult<RegisterResponse>> Register(
-            [FromBody] RegisterCommand command,
+            [FromBody] RegisterRequest request,
             CancellationToken cancellationToken)
         {
+            var command = _mapper.Map<RegisterCommand>(request);
+
             var result = await _mediator.Send(command, cancellationToken);
-            return Ok(result);
+
+            return Ok(result);   // RegisterResponse from Application
         }
 
         /// <summary>
@@ -36,11 +43,14 @@ namespace AccommodationBookingPlatform.API.Controllers
         [HttpPost("login")]
         [AllowAnonymous]
         public async Task<ActionResult<LoginResponse>> Login(
-            [FromBody] LoginCommand command,
+            [FromBody] LoginRequest request,
             CancellationToken cancellationToken)
         {
+            var command = _mapper.Map<LoginCommand>(request);
+
             var result = await _mediator.Send(command, cancellationToken);
-            return Ok(result);
+
+            return Ok(result);   // LoginResponse from Application
         }
     }
 }

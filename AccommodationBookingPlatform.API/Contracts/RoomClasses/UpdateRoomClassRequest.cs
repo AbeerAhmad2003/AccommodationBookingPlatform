@@ -1,10 +1,10 @@
 ﻿using AccommodationBookingPlatform.Domain.Common.Enums;
 
-namespace AccommodationBookingPlatform.Application.Features.RoomClasses.Common
+namespace AccommodationBookingPlatform.API.Contracts.RoomClasses
 {
-    public class RoomClassInputDto
+    public class UpdateRoomClassRequest
     {
-        public Guid HotelId { get; set; }
+        public Guid Id { get; set; }
 
         public string Name { get; set; }
         public string? Description { get; set; }

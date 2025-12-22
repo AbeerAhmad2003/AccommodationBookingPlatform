@@ -45,6 +45,20 @@ namespace AccommodationBookingPlatform.Persistence.Repositories
                 .AsNoTracking()
                 .ToListAsync(ct);
         }
+        public async Task<bool> ExistsNumberInRoomClassForAnotherRoomAsync(
+    Guid roomClassId,
+    string number,
+    Guid roomId,
+    CancellationToken cancellationToken)
+        {
+            return await _context.Rooms
+                .AnyAsync(r =>
+                    r.RoomClassId == roomClassId &&
+                    r.Number == number &&
+                    r.Id != roomId,
+                    cancellationToken);
+        }
+
     }
 
 

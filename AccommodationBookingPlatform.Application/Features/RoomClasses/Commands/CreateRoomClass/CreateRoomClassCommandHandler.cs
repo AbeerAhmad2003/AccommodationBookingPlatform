@@ -8,7 +8,7 @@ using MediatR;
 namespace AccommodationBookingPlatform.Application.Features.RoomClasses.Commands.CreateRoomClass
 {
     public class CreateRoomClassCommandHandler
-       : IRequestHandler<CreateRoomClassCommand>
+    : IRequestHandler<CreateRoomClassCommand, RoomClassDto>
     {
         private readonly IRoomClassRepository _roomClassRepository;
         private readonly IHotelRepository _hotelRepository;
@@ -28,30 +28,32 @@ namespace AccommodationBookingPlatform.Application.Features.RoomClasses.Commands
             CreateRoomClassCommand request,
             CancellationToken cancellationToken)
         {
-            var dto = request.RoomClass;
-
             var hotel = await _hotelRepository
-                .GetByIdAsync(dto.HotelId, cancellationToken);
+                .GetByIdAsync(request.HotelId, cancellationToken);
 
             if (hotel is null)
-                throw new NotFoundException(nameof(Hotel), dto.HotelId);
+                throw new NotFoundException(nameof(Hotel), request.HotelId);
 
             var exists = await _roomClassRepository
-                .ExistsByNameInHotelAsync(dto.HotelId, dto.Name, cancellationToken);
+                .ExistsByNameInHotelAsync(
+                    request.HotelId,
+                    request.Name,
+                    cancellationToken);
 
             if (exists)
-                throw new ConflictException("Room class with the same name already exists in this hotel.");
+                throw new ConflictException(
+                    "Room class with the same name already exists in this hotel.");
 
             var entity = new RoomClass
             {
                 Id = Guid.NewGuid(),
-                HotelId = dto.HotelId,
-                Name = dto.Name,
-                Description = dto.Description,
-                AdultsCapacity = dto.AdultsCapacity,
-                ChildrenCapacity = dto.ChildrenCapacity,
-                PricePerNight = dto.PricePerNight,
-                RoomType = dto.RoomType,
+                HotelId = request.HotelId,
+                Name = request.Name,
+                Description = request.Description,
+                AdultsCapacity = request.AdultsCapacity,
+                ChildrenCapacity = request.ChildrenCapacity,
+                PricePerNight = request.PricePerNight,
+                RoomType = request.RoomType,
                 CreatedAtUtc = DateTime.UtcNow
             };
 
@@ -61,8 +63,7 @@ namespace AccommodationBookingPlatform.Application.Features.RoomClasses.Commands
             entity.Hotel = hotel;
             entity.Rooms = new List<Room>();
 
-            var result = _mapper.Map<RoomClassDto>(entity);
-            return result;
+            return _mapper.Map<RoomClassDto>(entity);
         }
     }
 }
