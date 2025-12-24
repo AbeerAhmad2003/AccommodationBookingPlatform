@@ -63,10 +63,9 @@ namespace AccommodationBookingPlatform.API.Controllers.Admin
         [HttpPut("{id:guid}")]
         public async Task<IActionResult> UpdateHotel(Guid id, UpdateHotelRequest request)
         {
-            if (id != request.Id)
-                return BadRequest("Route id does not match request body id.");
-
             var command = _mapper.Map<UpdateHotelCommand>(request);
+
+            command = command with { Id = id };
 
             var result = await _mediator.Send(command);
 

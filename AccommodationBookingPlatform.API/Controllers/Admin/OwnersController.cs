@@ -59,10 +59,10 @@ namespace AccommodationBookingPlatform.API.Controllers.Admin
         [HttpPut("{id:guid}")]
         public async Task<ActionResult<OwnerDto>> Update(Guid id, UpdateOwnerRequest request, CancellationToken ct)
         {
-            if (id != request.Id)
-                return BadRequest("Id in route must match request Id");
-
             var command = _mapper.Map<UpdateOwnerCommand>(request);
+
+            // Inject Id from route
+            command = command with { Id = id };
 
             var result = await _mediator.Send(command, ct);
 

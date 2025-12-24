@@ -1,82 +1,122 @@
-﻿using AccommodationBookingPlatform.API.Contracts.RoomClasses;
-using AccommodationBookingPlatform.Application.Features.RoomClasses.Commands.CreateRoomClass;
-using AccommodationBookingPlatform.Application.Features.RoomClasses.Commands.DeleteRoomClass;
-using AccommodationBookingPlatform.Application.Features.RoomClasses.Commands.UpdateRoomClass;
-using AccommodationBookingPlatform.Application.Features.RoomClasses.Common;
-using AccommodationBookingPlatform.Application.Features.RoomClasses.Queries.GetRoomClassById;
-using AccommodationBookingPlatform.Application.Features.RoomClasses.Queries.GetRoomClassesByHotel;
+﻿using AccommodationBookingPlatform.API.Contracts.Bookings;
+using AccommodationBookingPlatform.Application.Features.Bookings.Commands.CreateBooking;
+using AccommodationBookingPlatform.Application.Features.Bookings.Commands.DeleteBooking;
+using AccommodationBookingPlatform.Application.Features.Bookings.Commands.UpdateBooking;
+using AccommodationBookingPlatform.Application.Features.Bookings.Queries.GetAllBookings;
+using AccommodationBookingPlatform.Application.Features.Bookings.Queries.GetBookingDetails;
+using AccommodationBookingPlatform.Application.Features.Bookings.Queries.GetPastBookings;
+using AccommodationBookingPlatform.Application.Features.Bookings.Queries.GetUpcomingBookings;
+using AccommodationBookingPlatform.Application.Features.Bookings.Queries.GetUserBookings;
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AccommodationBookingPlatform.API.Controllers.Admin
+[ApiController]
+[Route("api/[controller]")]
+[Authorize]
+public class BookingsController : ControllerBase
 {
-    [ApiController]
-    [Route("api/admin/[controller]")]
-    [Authorize(Roles = "Admin")]
-    public class RoomClassesController : ControllerBase
+    private readonly IMediator _mediator;
+    private readonly IMapper _mapper;
+
+    public BookingsController(IMediator mediator, IMapper mapper)
     {
-        private readonly IMediator _mediator;
-        private readonly IMapper _mapper;
+        _mediator = mediator;
+        _mapper = mapper;
+    }
 
-        public RoomClassesController(IMediator mediator, IMapper mapper)
-        {
-            _mediator = mediator;
-            _mapper = mapper;
-        }
+    // ===========================
+    // GET Booking By Id
+    // ===========================
+    [HttpGet("{id:guid}")]
+    public async Task<ActionResult<BookingDetailsDto>> GetById(Guid id, CancellationToken ct)
+    {
+        var result = await _mediator.Send(new GetBookingDetailsQuery(id), ct);
+        return Ok(result);
+    }
 
-        // GET /api/admin/roomclasses/{id}
-        [HttpGet("{id:guid}")]
-        public async Task<ActionResult<RoomClassDto>> GetById(Guid id)
-        {
-            var result = await _mediator.Send(new GetRoomClassByIdQuery(id));
-            return Ok(result);
-        }
+    // ===========================
+    // GET User Bookings
+    // ===========================
+    [HttpGet("user")]
+    public async Task<ActionResult<IEnumerable<UserBookingListItemDto>>> GetUserBookings(CancellationToken ct)
+    {
+        var result = await _mediator.Send(new GetUserBookingsQuery(), ct);
+        return Ok(result);
+    }
 
-        // GET /api/admin/hotels/{hotelId}/room-classes
-        [HttpGet("~/api/admin/hotels/{hotelId:guid}/room-classes")]
-        public async Task<ActionResult<IReadOnlyList<RoomClassDto>>> GetByHotel(Guid hotelId)
-        {
-            var result = await _mediator.Send(new GetRoomClassesByHotelQuery(hotelId));
-            return Ok(result);
-        }
+    [HttpGet("user/upcoming")]
+    public async Task<ActionResult<IEnumerable<UserBookingListItemDto>>> GetUpcoming(CancellationToken ct)
+    {
+        var result = await _mediator.Send(new GetUpcomingBookingsQuery(), ct);
+        return Ok(result);
+    }
 
-        // POST /api/admin/roomclasses
-        [HttpPost]
-        public async Task<ActionResult<RoomClassDto>> Create(CreateRoomClassRequest request)
-        {
-            var command = _mapper.Map<CreateRoomClassCommand>(request);
+    [HttpGet("user/past")]
+    public async Task<ActionResult<IEnumerable<UserBookingListItemDto>>> GetPast(CancellationToken ct)
+    {
+        var result = await _mediator.Send(new GetPastBookingsQuery(), ct);
+        return Ok(result);
+    }
 
-            var result = await _mediator.Send(command);
+    // ===========================
+    // Admin Paginated
+    // ===========================
+    [HttpGet("admin")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetAdminBookings(
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        CancellationToken ct = default)
+    {
+        var result = await _mediator.Send(
+            new GetAdminBookingsQuery(pageNumber, pageSize),
+            ct
+        );
 
-            return CreatedAtAction(nameof(GetById),
-                new { id = result.Id },
-                result);
-        }
+        return Ok(result);
+    }
 
-        // PUT /api/admin/roomclasses/{id}
-        [HttpPut("{id:guid}")]
-        public async Task<ActionResult<RoomClassDto>> Update(
-            Guid id,
-            UpdateRoomClassRequest request)
-        {
-            if (id != request.Id)
-                return BadRequest("Route id does not match body id.");
+    // ===========================
+    // CREATE Booking
+    // ===========================
+    [HttpPost]
+    public async Task<ActionResult<Guid>> Create(CreateBookingRequest request, CancellationToken ct)
+    {
+        var command = _mapper.Map<CreateBookingCommand>(request);
 
-            var command = _mapper.Map<UpdateRoomClassCommand>(request);
+        var bookingId = await _mediator.Send(command, ct);
 
-            var result = await _mediator.Send(command);
+        return CreatedAtAction(
+            nameof(GetById),
+            new { id = bookingId },
+            new { Id = bookingId }
+        );
+    }
 
-            return Ok(result);
-        }
+    // ===========================
+    // UPDATE Booking
+    // ===========================
+    [HttpPut("{id:guid}")]
+    public async Task<ActionResult<BookingDetailsDto>> Update(Guid id, UpdateBookingRequest request, CancellationToken ct)
+    {
+        var command = _mapper.Map<UpdateBookingCommand>(request);
+        command = command with { BookingId = id };
 
-        // DELETE /api/admin/roomclasses/{id}
-        [HttpDelete("{id:guid}")]
-        public async Task<IActionResult> Delete(Guid id)
-        {
-            await _mediator.Send(new DeleteRoomClassCommand(id));
-            return NoContent();
-        }
+        await _mediator.Send(command, ct);
+
+        return Ok(new { Id = id });
+    }
+
+    // ===========================
+    // DELETE Booking
+    // ===========================
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
+    {
+        await _mediator.Send(new DeleteBookingCommand(id), ct);
+
+        return NoContent();
     }
 }

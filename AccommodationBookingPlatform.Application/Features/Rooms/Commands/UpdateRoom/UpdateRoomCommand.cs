@@ -4,8 +4,11 @@ using MediatR;
 namespace AccommodationBookingPlatform.Application.Features.Rooms.Commands.UpdateRoom
 {
     public record UpdateRoomCommand(
-      Guid Id,
-      Guid RoomClassId,
-      string Number
-  ) : IRequest<RoomDto>;
+    Guid RoomClassId,
+    string Number
+) : IRequest<RoomDto>
+    {
+        public Guid Id { get; init; }
+    }
+
 }

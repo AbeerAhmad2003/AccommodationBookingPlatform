@@ -15,7 +15,7 @@ namespace AccommodationBookingPlatform.Domain.Entities
         public DateTime CheckOutDate { get; set; }
         public int Adults { get; set; }
         public int Children { get; set; }
-        public int RoomsCount { get; set; }
+        public int RoomsCount { get; private set; }
 
         public PaymentMethod PaymentMethod { get; set; }
         public decimal TotalPrice { get; set; }
@@ -25,5 +25,13 @@ namespace AccommodationBookingPlatform.Domain.Entities
 
         public DateTime CreatedAtUtc { get; set; }
         public DateTime? ModifiedAtUtc { get; set; }
+        public void SetRoomsCount(int roomsCount)
+        {
+            if (roomsCount <= 0)
+                throw new ArgumentException("Rooms count must be greater than zero.");
+
+            RoomsCount = roomsCount;
+        }
+
     }
 }

@@ -4,9 +4,11 @@ using MediatR;
 namespace AccommodationBookingPlatform.Application.Features.Cities.Commands.UpdateCity
 {
     public record UpdateCityCommand(
-    Guid Id,
-    string Name,
-    string Country,
-    string PostOffice
-) : IRequest<CityDto>;
+     string Name,
+     string Country,
+     string PostOffice
+ ) : IRequest<CityDto>
+    {
+        public Guid Id { get; init; }
+    }
 }

@@ -7,8 +7,8 @@ namespace AccommodationBookingPlatform.Application.Contracts.Persistence
     public interface IBookingRepository : IRepository<Booking>
     {
         Task<Booking> CreateAsync(
-        Booking booking,
-        CancellationToken ct = default);
+            Booking booking,
+            CancellationToken ct = default);
 
         Task<Booking?> GetByIdWithDetailsAsync(
             Guid bookingId,
@@ -25,16 +25,18 @@ namespace AccommodationBookingPlatform.Application.Contracts.Persistence
         Task DeleteAsync(
             Guid bookingId,
             CancellationToken ct = default);
-        Task<bool> IsHotelAvailableAsync(
-        Guid hotelId,
-        DateTime from,
-        DateTime to,
-       int requestedRooms,
-       CancellationToken ct = default);
-        Task<IReadOnlyList<Booking>> GetRecentBookingsInDifferentHotelsByUserId(
-       Guid userId,
-       int count,
-       CancellationToken ct = default);
 
+        Task<bool> IsHotelAvailableAsync(
+            Guid hotelId,
+            DateTime from,
+            DateTime to,
+            int requestedRooms,
+            CancellationToken ct = default);
+
+        Task<IReadOnlyList<Booking>> GetRecentBookingsInDifferentHotelsByUserId(
+            Guid userId,
+            int count,
+            CancellationToken ct = default);
     }
+
 }

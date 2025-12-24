@@ -61,18 +61,18 @@ namespace AccommodationBookingPlatform.API.Controllers.Admin
         // ============================================
         [HttpPut("{id:guid}")]
         public async Task<ActionResult<RoomDto>> Update(
-            Guid id,
-            UpdateRoomRequest request,
-            CancellationToken ct)
+     Guid id,
+     UpdateRoomRequest request,
+     CancellationToken ct)
         {
-            if (id != request.Id)
-                return BadRequest("Route id must match body id");
-
             var command = _mapper.Map<UpdateRoomCommand>(request);
+
+            command = command with { Id = id };
 
             var result = await _mediator.Send(command, ct);
 
             return Ok(result);
         }
+
     }
 }

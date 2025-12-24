@@ -2,7 +2,6 @@
 {
     public class UpdateHotelRequest
     {
-        public Guid Id { get; set; }
         public string Name { get; set; }
         public Guid CityId { get; set; }
         public Guid OwnerId { get; set; }

@@ -1,4 +1,5 @@
 ﻿using AccommodationBookingPlatform.Application.Common.Behaviours;
+using AccommodationBookingPlatform.Application.Contracts.Services.Pricing;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
@@ -20,6 +21,8 @@ namespace AccommodationBookingPlatform.Application
 
             services.AddValidatorsFromAssembly(
                 typeof(ApplicationServiceRegistration).Assembly);
+            services.AddScoped<IFeaturedDealCalculator, FeaturedDealCalculator>();
+            services.AddScoped<IBookingPricingService, BookingPricingService>();
 
             return services;
         }
