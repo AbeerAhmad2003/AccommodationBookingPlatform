@@ -14,14 +14,16 @@ namespace AccommodationBookingPlatform.Persistence.Repositories
             _context = context;
         }
 
-        public async Task<IReadOnlyList<InvoiceRecord>> GetByBookingIdAsync(
+        public async Task<InvoiceRecord?> GetInvoiceByBookingIdAsync(
             Guid bookingId,
             CancellationToken ct = default)
         {
             return await _context.InvoiceRecords
-                .Where(i => i.BookingId == bookingId)
-                .AsNoTracking()
-                .ToListAsync(ct);
+                    .FirstOrDefaultAsync(x => x.BookingId == bookingId);
+
         }
     }
+
+
+
 }

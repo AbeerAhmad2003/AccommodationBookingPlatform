@@ -4,6 +4,7 @@ using AccommodationBookingPlatform.Application;
 using AccommodationBookingPlatform.Infrastructure;
 using AccommodationBookingPlatform.Persistence;
 using Microsoft.OpenApi.Models;
+using QuestPDF.Infrastructure;
 
 namespace AccommodationBookingPlatform.API
 {
@@ -92,6 +93,9 @@ namespace AccommodationBookingPlatform.API
             // Controllers Mapping
             // *************************************
             app.MapControllers();
+
+            QuestPDF.Settings.License = LicenseType.Community;
+
 
             app.Run();
         }

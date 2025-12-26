@@ -7,6 +7,7 @@ using AccommodationBookingPlatform.Application.Features.Bookings.Queries.GetBook
 using AccommodationBookingPlatform.Application.Features.Bookings.Queries.GetPastBookings;
 using AccommodationBookingPlatform.Application.Features.Bookings.Queries.GetUpcomingBookings;
 using AccommodationBookingPlatform.Application.Features.Bookings.Queries.GetUserBookings;
+using AccommodationBookingPlatform.Application.Features.Invoices.Queries.GetInvoicePdf;
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -120,6 +121,20 @@ namespace AccommodationBookingPlatform.API.Controllers
             await _mediator.Send(new DeleteBookingCommand(id), ct);
 
             return NoContent();
+        }
+        [HttpGet("{bookingId}/invoice/pdf")]
+        public async Task<IActionResult> DownloadInvoicePdf(Guid bookingId, CancellationToken ct)
+        {
+            var result = await _mediator.Send(
+                new GetInvoicePdfQuery(bookingId),
+                ct
+            );
+
+            return File(
+                result.Content,          // byte[]
+                "application/pdf",       // content-type
+                result.FileName          // suggested file name
+            );
         }
 
 

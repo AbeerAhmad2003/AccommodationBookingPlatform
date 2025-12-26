@@ -4,8 +4,9 @@ namespace AccommodationBookingPlatform.Application.Contracts.Persistence
 {
     public interface IInvoiceRepository : IRepository<InvoiceRecord>
     {
-        Task<IReadOnlyList<InvoiceRecord>> GetByBookingIdAsync(
+        Task<InvoiceRecord?> GetInvoiceByBookingIdAsync(
             Guid bookingId,
             CancellationToken ct = default);
     }
 }
+
