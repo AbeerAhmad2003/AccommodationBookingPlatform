@@ -4,36 +4,22 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace AccommodationBookingPlatform.Persistence.Configurations
 {
-    public class InvoiceRecordConfiguration
+    public class InvoiceRecordConfiguration : IEntityTypeConfiguration<InvoiceRecord>
     {
         public void Configure(EntityTypeBuilder<InvoiceRecord> builder)
         {
-            // Primary Key
-            builder.HasKey(ir => ir.Id);
+            builder.HasKey(i => i.Id);
 
-            // InvoiceRecord → Booking (Many-to-One)
-            builder.HasOne(ir => ir.Booking)
+            builder.Property(i => i.InvoiceNumber)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            builder.Property(i => i.TotalAmount)
+                .HasColumnType("decimal(18,2)");
+
+            builder.HasOne(i => i.Booking)
                 .WithMany(b => b.InvoiceRecords)
-                .HasForeignKey(ir => ir.BookingId)
-                .IsRequired()
-                .OnDelete(DeleteBehavior.Cascade);
-
-            // Room info snapshot
-            builder.Property(ir => ir.RoomClassName)
-                .IsRequired()
-                .HasMaxLength(100);
-
-            builder.Property(ir => ir.RoomNumber)
-                .IsRequired()
-                .HasMaxLength(20);
-
-            // Prices at booking time
-            builder.Property(ir => ir.PriceAtBooking)
-                .HasPrecision(18, 2)
-                .IsRequired();
-
-            builder.Property(ir => ir.DiscountPercentageAtBooking)
-                .HasPrecision(5, 2);
+                .HasForeignKey(i => i.BookingId);
         }
     }
 }

@@ -20,17 +20,22 @@ namespace AccommodationBookingPlatform.API.Controllers
         //  Search Results Page
         [HttpGet("search")]
         public async Task<IActionResult> Search(
-            [FromQuery] Guid? cityId,
-            [FromQuery] string? cityName,
-            [FromQuery] double? minStars,
-            [FromQuery] double? maxStars,
-            [FromQuery] DateTime? checkIn,
-            [FromQuery] DateTime? checkOut,
-            [FromQuery] int rooms = 1,
-            [FromQuery] int pageNumber = 1,
-            [FromQuery] int pageSize = 10,
-            [FromQuery] string? sortColumn = "Rating",
-            [FromQuery] SortOrder sortOrder = SortOrder.Desc)
+    [FromQuery] Guid? cityId,
+    [FromQuery] string? cityName,
+    [FromQuery] double? minStars,
+    [FromQuery] double? maxStars,
+    [FromQuery] DateTime? checkIn,
+    [FromQuery] DateTime? checkOut,
+    [FromQuery] int rooms = 1,
+    [FromQuery] int pageNumber = 1,
+    [FromQuery] int pageSize = 10,
+    [FromQuery] string? sortColumn = "Rating",
+    [FromQuery] SortOrder sortOrder = SortOrder.Desc,
+    [FromQuery] List<Guid>? amenities = null,
+    [FromQuery] decimal? minPrice = null,
+    [FromQuery] decimal? maxPrice = null,
+    [FromQuery] RoomType? roomType = null
+)
         {
             var query = new SearchHotelsQuery(
                 cityId,
@@ -43,12 +48,17 @@ namespace AccommodationBookingPlatform.API.Controllers
                 pageNumber,
                 pageSize,
                 sortColumn,
-                sortOrder
+                sortOrder,
+                amenities,
+                minPrice,
+                maxPrice,
+                roomType
             );
 
             var result = await _mediator.Send(query);
             return Ok(result);
         }
+
 
         // Hotel Page (Details + Gallery + Availability + Reviews)
         [HttpGet("{hotelId:guid}")]

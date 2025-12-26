@@ -16,6 +16,7 @@
         public string PaymentMethod { get; set; }
 
         public DateTime CreatedAtUtc { get; set; }
+        public InvoiceDto? Invoice { get; set; }
     }
 
 }

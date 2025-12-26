@@ -26,12 +26,18 @@ namespace AccommodationBookingPlatform.Persistence.Repositories
         }
 
         public async Task<Booking?> GetByIdWithDetailsAsync(
-            Guid bookingId,
-            CancellationToken ct = default)
+       Guid bookingId,
+       CancellationToken ct = default)
         {
             return await _context.Bookings
                 .Include(b => b.Hotel)
                     .ThenInclude(h => h.City)
+                .Include(b => b.Hotel)
+                    .ThenInclude(h => h.RoomClasses)
+                        .ThenInclude(rc => rc.Discounts)
+                .Include(b => b.Hotel)
+                    .ThenInclude(h => h.RoomClasses)
+                        .ThenInclude(rc => rc.Rooms)
                 .Include(b => b.InvoiceRecords)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(b => b.Id == bookingId, ct);

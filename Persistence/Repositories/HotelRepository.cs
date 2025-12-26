@@ -55,11 +55,19 @@ namespace AccommodationBookingPlatform.Persistence.Repositories
                 query.PageSize);
         }
         public async Task<IEnumerable<Hotel>> GetFeaturedDealsAsync(
-            int count,
-            CancellationToken cancellationToken = default)
+     int count,
+     CancellationToken cancellationToken = default)
         {
+            var nowUtc = DateTime.UtcNow;
+
             return await _context.Hotels
-                .Where(h => h.RoomClasses.Any(rc => rc.Discounts.Any()))
+                .Include(h => h.RoomClasses)
+                    .ThenInclude(rc => rc.Discounts)
+                .Where(h =>
+                    h.RoomClasses.Any(rc =>
+                        rc.Discounts.Any(d =>
+                            d.StartDateUtc <= nowUtc &&
+                            d.EndDateUtc >= nowUtc)))
                 .OrderByDescending(h => h.ReviewsRating)
                 .Take(count)
                 .AsNoTracking()

@@ -2,6 +2,7 @@
 using AccommodationBookingPlatform.Application.Contracts.Infrastructure.Services;
 using AccommodationBookingPlatform.Application.Contracts.Services.Pricing;
 using AccommodationBookingPlatform.Infrastrucutre;
+using AccommodationBookingPlatform.Infrastrucutre.Email;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -19,6 +20,8 @@ namespace AccommodationBookingPlatform.Infrastructure
             services.AddScoped<IPasswordHasher, PasswordHasher>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IFeaturedDealCalculator, FeaturedDealCalculator>();
+            services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
+            services.AddScoped<IEmailService, EmailService>();
 
             return services;
         }

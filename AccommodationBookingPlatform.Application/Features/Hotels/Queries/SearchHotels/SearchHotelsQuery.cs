@@ -17,6 +17,13 @@ namespace AccommodationBookingPlatform.Application.Features.Hotels.Queries.Searc
      int PageNumber = 1,
      int PageSize = 10,
      string? SortColumn = "Rating",
-     SortOrder SortOrder = SortOrder.Desc
+     SortOrder SortOrder = SortOrder.Desc,
+
+     List<Guid>? AmenityIds = null,
+
+     decimal? MinPrice = null,
+     decimal? MaxPrice = null,
+
+     RoomType? RoomType = null
  ) : IRequest<PaginatedList<HotelSearchResultDto>>;
 }
