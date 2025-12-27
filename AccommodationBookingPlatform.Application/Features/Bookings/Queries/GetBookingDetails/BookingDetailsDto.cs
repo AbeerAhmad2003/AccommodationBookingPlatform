@@ -17,6 +17,7 @@
 
         public DateTime CreatedAtUtc { get; set; }
         public InvoiceDto? Invoice { get; set; }
+        public Guid RoomClassId { get; set; }
     }
 
 }

@@ -1,7 +1,6 @@
 ﻿using AccommodationBookingPlatform.Application.Contracts.Infrastructure.Services;
 using AccommodationBookingPlatform.Application.Contracts.Persistence;
 using AccommodationBookingPlatform.Application.Contracts.Services.Pricing;
-using AccommodationBookingPlatform.Application.Email;
 using AccommodationBookingPlatform.Application.Exceptions;
 using AccommodationBookingPlatform.Domain.Entities;
 using MediatR;
@@ -45,27 +44,32 @@ namespace AccommodationBookingPlatform.Application.Features.Bookings.Commands.Cr
             var userId = _currentUser.UserId.Value;
 
             // Check hotel exists
-            var hotel = await _hotelRepository.GetByIdAsync(
+            var hotel = await _hotelRepository.GetByIdWithRoomClassesAsync(
                 request.HotelId, cancellationToken);
 
             if (hotel is null)
                 throw new NotFoundException("Hotel", request.HotelId);
+            var roomClass = hotel.RoomClasses?.FirstOrDefault(rc => rc.Id == request.RoomClassId);
+
+            if (roomClass is null)
+                throw new BadRequestException("Selected room class does not belong to this hotel.");
 
             // Check Availability
-            var isAvailable = await _bookingRepository.IsHotelAvailableAsync(
-                request.HotelId,
-                request.CheckInDate,
-                request.CheckOutDate,
-                request.RoomsCount,
-                cancellationToken);
+            var isAvailable = await _bookingRepository.IsRoomClassAvailableAsync(
+          request.RoomClassId,
+          request.CheckInDate,
+          request.CheckOutDate,
+          request.RoomsCount,
+          cancellationToken);
 
             if (!isAvailable)
                 throw new BadRequestException(
-                    "Hotel is not available for the selected dates and rooms count.");
+                    "Selected room class is not available for the selected dates and rooms count.");
 
-            // Pricing (supports discounts)
-            var totalPrice = await _pricingService.CalculateTotalPriceAsync(
+            // 3) Pricing (with snapshot)
+            var pricing = await _pricingService.CalculateAsync(
                 hotel,
+                roomClass,
                 request.CheckInDate,
                 request.CheckOutDate,
                 request.RoomsCount,
@@ -73,24 +77,31 @@ namespace AccommodationBookingPlatform.Application.Features.Bookings.Commands.Cr
                 request.Children,
                 cancellationToken);
 
-            // Create Booking
+
+            // 4) Create Booking with snapshot
             var booking = new Booking
             {
                 UserId = userId,
                 HotelId = request.HotelId,
+                RoomClassId = request.RoomClassId,
                 CheckInDate = request.CheckInDate,
                 CheckOutDate = request.CheckOutDate,
                 Adults = request.Adults,
                 Children = request.Children,
                 PaymentMethod = request.PaymentMethod,
-                TotalPrice = totalPrice,
+
+                PricePerNightAtBooking = pricing.OriginalPricePerNight,
+                DiscountPercentageApplied = pricing.DiscountPercentage,
+                FinalPricePerNight = pricing.FinalPricePerNight,
+                Nights = pricing.Nights,
+                TotalPrice = pricing.TotalPrice,
+
                 CreatedAtUtc = DateTime.UtcNow
             };
 
             booking.SetRoomsCount(request.RoomsCount);
 
             booking = await _bookingRepository.CreateAsync(booking, cancellationToken);
-
             // Create Invoice Record
             var nowUtc = DateTime.UtcNow;
 
@@ -98,28 +109,34 @@ namespace AccommodationBookingPlatform.Application.Features.Bookings.Commands.Cr
             {
                 BookingId = booking.Id,
                 UserId = userId,
-                TotalAmount = totalPrice,
-                PaymentMethod = request.PaymentMethod,
 
+                TotalAmount = pricing.TotalPrice,
+                PaymentMethod = request.PaymentMethod,
                 InvoiceNumber = $"INV-{nowUtc:yyyyMMdd}-{booking.Id.ToString()[..8]}",
+
+                PricePerNightBeforeDiscount = pricing.OriginalPricePerNight,
+                DiscountPercentageApplied = pricing.DiscountPercentage,
+                FinalPricePerNight = pricing.FinalPricePerNight,
+                Nights = pricing.Nights,
+                RoomsCount = pricing.RoomsCount,
+
                 CreatedAtUtc = nowUtc
             };
-
             await _invoiceRepository.AddAsync(invoice, cancellationToken);
-            var email = new EmailMessageBuilder()
-       .To(_currentUser.Email!)
-       .Subject("Booking Confirmation & Invoice")
-       .HtmlBody($@"
-            <h2>Booking Confirmed 🎉</h2>
-            <p>Hotel: {hotel.Name}</p>
-            <p>Check-in: {request.CheckInDate:yyyy-MM-dd}</p>
-            <p>Check-out: {request.CheckOutDate:yyyy-MM-dd}</p>
-            <p>Total: {totalPrice} $</p>
-            <p>Invoice Number: {invoice.InvoiceNumber}</p>
-        ")
-       .Build();
+            //     var email = new EmailMessageBuilder()
+            //.To(_currentUser.Email!)
+            //.Subject("Booking Confirmation & Invoice")
+            //.HtmlBody($@"
+            //     <h2>Booking Confirmed 🎉</h2>
+            //     <p>Hotel: {hotel.Name}</p>
+            //     <p>Check-in: {request.CheckInDate:yyyy-MM-dd}</p>
+            //     <p>Check-out: {request.CheckOutDate:yyyy-MM-dd}</p>
+            //     <p>Total: {totalPrice} $</p>
+            //     <p>Invoice Number: {invoice.InvoiceNumber}</p>
+            // ")
+            //.Build();
 
-            await _emailService.SendAsync(email, cancellationToken);
+            // await _emailService.SendAsync(email, cancellationToken);
 
             return booking.Id;
         }

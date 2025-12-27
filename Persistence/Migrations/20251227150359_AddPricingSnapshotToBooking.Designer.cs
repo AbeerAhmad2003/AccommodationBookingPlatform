@@ -4,6 +4,7 @@ using AccommodationBookingPlatform.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AccommodationBookingPlatform.Persistence.Migrations
 {
     [DbContext(typeof(AccommodationBookingDbContext))]
-    partial class AccommodationBookingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251227150359_AddPricingSnapshotToBooking")]
+    partial class AddPricingSnapshotToBooking
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -280,12 +283,6 @@ namespace AccommodationBookingPlatform.Persistence.Migrations
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("datetime2");
 
-                    b.Property<decimal?>("DiscountPercentageApplied")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("FinalPricePerNight")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<string>("InvoiceNumber")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -294,20 +291,11 @@ namespace AccommodationBookingPlatform.Persistence.Migrations
                     b.Property<DateTime?>("ModifiedAtUtc")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("Nights")
-                        .HasColumnType("int");
-
                     b.Property<int>("PaymentMethod")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("PricePerNightBeforeDiscount")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<Guid?>("RoomId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("RoomsCount")
-                        .HasColumnType("int");
 
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(18,2)");

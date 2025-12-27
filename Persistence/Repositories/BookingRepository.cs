@@ -62,7 +62,8 @@ namespace AccommodationBookingPlatform.Persistence.Repositories
         {
             IQueryable<Booking> bookings = _context.Bookings
                 .Include(b => b.Hotel)
-                    .ThenInclude(h => h.City);
+                    .ThenInclude(h => h.City)
+                    .Include(b => b.User);
 
             if (query.Filter != null)
                 bookings = bookings.Where(query.Filter);
@@ -147,7 +148,34 @@ namespace AccommodationBookingPlatform.Persistence.Repositories
 
             return distinctBookings;
         }
-    }
+        public async Task<bool> IsRoomClassAvailableAsync(
+    Guid roomClassId,
+    DateTime from,
+    DateTime to,
+    int requestedRooms,
+    CancellationToken ct = default)
+        {
+            if (from >= to)
+                throw new ArgumentException("Invalid date range.");
 
+            // total rooms in this room class only
+            var totalRooms = await _context.Rooms
+                .CountAsync(r => r.RoomClassId == roomClassId, ct);
+
+            // booked rooms in this room class in overlapping period
+            var bookedRooms = await _context.Bookings
+                .Where(b =>
+                    b.RoomClassId == roomClassId &&
+                    b.CheckInDate < to &&
+                    b.CheckOutDate > from
+                )
+                .SumAsync(b => b.RoomsCount, ct);
+
+            var availableRooms = totalRooms - bookedRooms;
+
+            return availableRooms >= requestedRooms;
+        }
+
+    }
 
 }

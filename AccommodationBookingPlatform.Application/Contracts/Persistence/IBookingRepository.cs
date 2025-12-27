@@ -37,6 +37,13 @@ namespace AccommodationBookingPlatform.Application.Contracts.Persistence
             Guid userId,
             int count,
             CancellationToken ct = default);
+        Task<bool> IsRoomClassAvailableAsync(
+    Guid roomClassId,
+    DateTime from,
+    DateTime to,
+    int requestedRooms,
+    CancellationToken ct = default);
+
     }
 
 }

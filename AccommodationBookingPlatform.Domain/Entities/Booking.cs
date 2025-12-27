@@ -11,13 +11,23 @@ namespace AccommodationBookingPlatform.Domain.Entities
         public Guid HotelId { get; set; }
         public Hotel Hotel { get; set; }
 
+        public Guid RoomClassId { get; set; }
+        public RoomClass RoomClass { get; set; }
+
         public DateTime CheckInDate { get; set; }
         public DateTime CheckOutDate { get; set; }
+
         public int Adults { get; set; }
         public int Children { get; set; }
+
         public int RoomsCount { get; private set; }
 
         public PaymentMethod PaymentMethod { get; set; }
+        public decimal PricePerNightAtBooking { get; set; }
+        public decimal? DiscountPercentageApplied { get; set; }
+        public decimal FinalPricePerNight { get; set; }
+        public int Nights { get; set; }
+
         public decimal TotalPrice { get; set; }
 
         public ICollection<Room> Rooms { get; set; } = new List<Room>();
@@ -25,6 +35,7 @@ namespace AccommodationBookingPlatform.Domain.Entities
 
         public DateTime CreatedAtUtc { get; set; }
         public DateTime? ModifiedAtUtc { get; set; }
+
         public void SetRoomsCount(int roomsCount)
         {
             if (roomsCount <= 0)
@@ -32,6 +43,6 @@ namespace AccommodationBookingPlatform.Domain.Entities
 
             RoomsCount = roomsCount;
         }
-
     }
 }
+

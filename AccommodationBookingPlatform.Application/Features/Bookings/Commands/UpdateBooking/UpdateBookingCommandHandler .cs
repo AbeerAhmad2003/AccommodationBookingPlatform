@@ -44,6 +44,13 @@ namespace AccommodationBookingPlatform.Application.Features.Bookings.Commands.Up
             if (booking.CheckInDate <= DateTime.UtcNow)
                 throw new BadRequestException(
                     "You cannot modify a booking after check-in has started.");
+            var roomClass = booking.Hotel
+          .RoomClasses
+          .FirstOrDefault(rc => rc.Id == request.RoomClassId);
+
+            if (roomClass is null)
+                throw new BadRequestException(
+                    "Selected room class does not belong to this hotel.");
 
             // 🏨 Re-check availability
             var isAvailable = await _bookingRepository.IsHotelAvailableAsync(
@@ -58,23 +65,31 @@ namespace AccommodationBookingPlatform.Application.Features.Bookings.Commands.Up
                     "Rooms are not available for the selected period.");
 
             // 💰 Recalculate pricing (supports discounts)
-            var newPrice = await _pricingService.CalculateTotalPriceAsync(
-                booking.Hotel,
-                request.CheckInDate,
-                request.CheckOutDate,
-                request.RoomsCount,
-                request.Adults,
-                request.Children,
-                cancellationToken);
+            var pricing = await _pricingService.CalculateAsync(
+           booking.Hotel,
+           roomClass,
+           request.CheckInDate,
+           request.CheckOutDate,
+           request.RoomsCount,
+           request.Adults,
+           request.Children,
+           cancellationToken);
 
             // ✏️ Apply update
+            booking.RoomClassId = request.RoomClassId;
             booking.CheckInDate = request.CheckInDate;
             booking.CheckOutDate = request.CheckOutDate;
             booking.Adults = request.Adults;
             booking.Children = request.Children;
             booking.PaymentMethod = request.PaymentMethod;
-            booking.TotalPrice = newPrice;
             booking.SetRoomsCount(request.RoomsCount);
+
+            booking.PricePerNightAtBooking = pricing.OriginalPricePerNight;
+            booking.DiscountPercentageApplied = pricing.DiscountPercentage;
+            booking.FinalPricePerNight = pricing.FinalPricePerNight;
+            booking.Nights = pricing.Nights;
+            booking.TotalPrice = pricing.TotalPrice;
+
             booking.ModifiedAtUtc = DateTime.UtcNow;
 
             await _bookingRepository.UpdateAsync(booking, cancellationToken);

@@ -22,6 +22,8 @@ namespace AccommodationBookingPlatform.Application.Contracts.Persistence
 
         Task<bool> ExistsAtLocationAsync(Guid cityId, double longitude, double latitude, double tolerance = 0.0005,
         CancellationToken ct = default);
+        Task<Hotel?> GetByIdWithRoomClassesAsync(Guid id, CancellationToken ct = default);
+
 
     }
 

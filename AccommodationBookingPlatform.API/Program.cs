@@ -30,6 +30,7 @@ namespace AccommodationBookingPlatform.API
             // Controllers
             // *************************************
             builder.Services.AddControllers();
+            builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
             // *************************************
             // Swagger
@@ -93,6 +94,8 @@ namespace AccommodationBookingPlatform.API
             // Controllers Mapping
             // *************************************
             app.MapControllers();
+            // AutoMapper
+            // *************************************
 
             QuestPDF.Settings.License = LicenseType.Community;
 

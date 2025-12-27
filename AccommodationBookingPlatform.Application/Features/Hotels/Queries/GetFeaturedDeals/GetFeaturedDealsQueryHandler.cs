@@ -41,7 +41,10 @@ namespace AccommodationBookingPlatform.Application.Features.Hotels.Queries.GetFe
                 dto.DiscountedPrice = discounted;
 
                 return dto;
-            }).ToList();
+            })
+                .OrderBy(dto => dto.DiscountedPrice)
+                .Take(request.Count)
+                .ToList();
         }
     }
 }

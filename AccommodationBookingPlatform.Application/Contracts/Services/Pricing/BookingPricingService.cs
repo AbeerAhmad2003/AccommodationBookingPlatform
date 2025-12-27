@@ -4,8 +4,10 @@ namespace AccommodationBookingPlatform.Application.Contracts.Services.Pricing
 {
     public class BookingPricingService : IBookingPricingService
     {
-        public Task<decimal> CalculateTotalPriceAsync(
+
+        public async Task<PricingResult> CalculateAsync(
             Hotel hotel,
+            RoomClass roomClass,
             DateTime checkIn,
             DateTime checkOut,
             int roomsCount,
@@ -13,45 +15,67 @@ namespace AccommodationBookingPlatform.Application.Contracts.Services.Pricing
             int children,
             CancellationToken ct = default)
         {
-            var nights = (checkOut.Date - checkIn.Date).Days;
 
-            if (nights <= 0)
-                throw new ArgumentException("Invalid stay duration.");
+            await Task.CompletedTask;
 
-            if (hotel.RoomClasses is null || !hotel.RoomClasses.Any())
-                throw new InvalidOperationException("Hotel has no room classes.");
+            if (checkOut <= checkIn)
+                throw new ArgumentException("Checkout must be after Checkin");
 
-            var effectivePrices = new List<decimal>();
+            int nights = (checkOut - checkIn).Days;
 
-            foreach (var roomClass in hotel.RoomClasses)
+            decimal originalPricePerNight = roomClass.PricePerNight;
+
+            var nowUtc = DateTime.UtcNow;
+
+            var discount = roomClass.Discounts?
+                .FirstOrDefault(d =>
+                   d.StartDateUtc < checkOut &&
+        d.EndDateUtc > checkIn);
+
+            decimal? discountPercent = discount?.Percentage;
+
+            decimal finalPricePerNight = originalPricePerNight;
+
+            if (discountPercent is not null)
             {
-                decimal basePrice = roomClass.PricePerNight;
-
-                // Get active discounts during requested stay
-                var activeDiscounts = roomClass.Discounts
-                    .Where(d =>
-                        d.StartDateUtc <= checkIn &&
-                        d.EndDateUtc >= checkOut)
-                    .ToList();
-
-                decimal effectivePrice = basePrice;
-
-                if (activeDiscounts.Any())
-                {
-                    // Choose best discount (lowest resulting price)
-                    effectivePrice = activeDiscounts
-                        .Select(d => basePrice * (1 - d.Percentage / 100m))
-                        .Min();
-                }
-
-                effectivePrices.Add(effectivePrice);
+                finalPricePerNight =
+                    originalPricePerNight * (1 - (discountPercent.Value / 100m));
             }
 
-            var bestPricePerNight = effectivePrices.Min();
+            decimal total = finalPricePerNight * nights * roomsCount;
 
-            decimal total = bestPricePerNight * roomsCount * nights;
+            return new PricingResult(
+                OriginalPricePerNight: originalPricePerNight,
+                DiscountPercentage: discountPercent,
+                FinalPricePerNight: finalPricePerNight,
+                Nights: nights,
+                RoomsCount: roomsCount,
+                TotalPrice: total
+            );
+        }
 
-            return Task.FromResult(total);
+        public async Task<decimal> CalculateTotalPriceAsync(
+            Hotel hotel,
+            RoomClass roomClass,
+            DateTime checkIn,
+            DateTime checkOut,
+            int roomsCount,
+            int adults,
+            int children,
+            CancellationToken ct = default)
+        {
+            var result = await CalculateAsync(
+                hotel,
+                roomClass,
+                checkIn,
+                checkOut,
+                roomsCount,
+                adults,
+                children,
+                ct);
+
+            return result.TotalPrice;
         }
     }
 }
+

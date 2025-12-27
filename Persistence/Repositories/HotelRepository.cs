@@ -172,6 +172,17 @@ namespace AccommodationBookingPlatform.Persistence.Repositories
                 Math.Abs(h.Latitude - latitude) <= tolerance,
                 ct);
         }
+        public async Task<Hotel?> GetByIdWithRoomClassesAsync(
+    Guid id,
+    CancellationToken ct = default)
+        {
+            return await _context.Hotels
+                .Include(h => h.RoomClasses)
+                 .ThenInclude(rc => rc.Discounts)
+                .FirstOrDefaultAsync(h => h.Id == id, ct);
+        }
+
+
 
     }
 }

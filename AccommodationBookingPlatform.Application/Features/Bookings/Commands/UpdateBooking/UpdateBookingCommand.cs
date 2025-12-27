@@ -4,6 +4,7 @@ using MediatR;
 namespace AccommodationBookingPlatform.Application.Features.Bookings.Commands.UpdateBooking
 {
     public record UpdateBookingCommand(
+     Guid RoomClassId,
     DateTime CheckInDate,
     DateTime CheckOutDate,
     int Adults,

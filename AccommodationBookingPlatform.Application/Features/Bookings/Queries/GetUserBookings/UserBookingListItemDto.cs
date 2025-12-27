@@ -13,6 +13,7 @@
         public decimal TotalPrice { get; set; }
 
         public DateTime CreatedAtUtc { get; set; }
+        public Guid RoomClassId { get; set; }
     }
 
 }

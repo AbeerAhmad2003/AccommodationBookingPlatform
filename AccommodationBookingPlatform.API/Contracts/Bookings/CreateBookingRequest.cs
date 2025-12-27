@@ -5,6 +5,7 @@ namespace AccommodationBookingPlatform.API.Contracts.Bookings
     public class CreateBookingRequest
     {
         public Guid HotelId { get; set; }
+        public Guid RoomClassId { get; set; }
 
         public DateTime CheckInDate { get; set; }
 
