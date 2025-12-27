@@ -1,6 +1,7 @@
 ﻿using AccommodationBookingPlatform.Application.Contracts.Infrastructure.Services;
 using AccommodationBookingPlatform.Application.Contracts.Persistence;
 using AccommodationBookingPlatform.Application.Contracts.Services.Pricing;
+using AccommodationBookingPlatform.Application.Email;
 using AccommodationBookingPlatform.Application.Exceptions;
 using AccommodationBookingPlatform.Domain.Entities;
 using MediatR;
@@ -123,20 +124,62 @@ namespace AccommodationBookingPlatform.Application.Features.Bookings.Commands.Cr
                 CreatedAtUtc = nowUtc
             };
             await _invoiceRepository.AddAsync(invoice, cancellationToken);
-            //     var email = new EmailMessageBuilder()
-            //.To(_currentUser.Email!)
-            //.Subject("Booking Confirmation & Invoice")
-            //.HtmlBody($@"
-            //     <h2>Booking Confirmed 🎉</h2>
-            //     <p>Hotel: {hotel.Name}</p>
-            //     <p>Check-in: {request.CheckInDate:yyyy-MM-dd}</p>
-            //     <p>Check-out: {request.CheckOutDate:yyyy-MM-dd}</p>
-            //     <p>Total: {totalPrice} $</p>
-            //     <p>Invoice Number: {invoice.InvoiceNumber}</p>
-            // ")
-            //.Build();
+            var email = new EmailMessageBuilder()
+       .To(_currentUser.Email!)
+       .Subject("Booking Confirmation & Invoice")
+       .HtmlBody($@"
+        <div style='font-family:Arial; padding:15px'>
+            <h2 style='color:#2c3e50;'>Booking Confirmed 🎉</h2>
 
-            // await _emailService.SendAsync(email, cancellationToken);
+            <p>Dear Customer,</p>
+            <p>Your booking has been successfully confirmed. Below are your booking details:</p>
+
+            <hr/>
+
+            <h3>🏨 Hotel Information</h3>
+            <p>
+                <b>Hotel:</b> {hotel.Name}<br/>
+                <b>Room Class:</b> {roomClass.Name}<br/>
+                <b>Check-in:</b> {request.CheckInDate:yyyy-MM-dd}<br/>
+                <b>Check-out:</b> {request.CheckOutDate:yyyy-MM-dd}<br/>
+                <b>Nights:</b> {pricing.Nights}<br/>
+                <b>Rooms:</b> {pricing.RoomsCount}
+            </p>
+
+            <hr/>
+
+            <h3>💰 Pricing Summary</h3>
+            <p>
+                <b>Original Price / Night:</b> {pricing.OriginalPricePerNight} $<br/>
+                <b>Discount Applied:</b> {(pricing.DiscountPercentage is null ? "No Discount" : pricing.DiscountPercentage + "%")}<br/>
+                <b>Final Price / Night:</b> {pricing.FinalPricePerNight} $<br/>
+                <b>Total:</b> <span style='color:green;font-size:18px;'>{pricing.TotalPrice} $</span>
+            </p>
+
+            <hr/>
+
+            <h3>📄 Invoice</h3>
+            <p>
+                <b>Invoice Number:</b> {invoice.InvoiceNumber}<br/>
+                <b>Created:</b> {invoice.CreatedAtUtc}
+            </p>
+
+            <p>You can download your invoice from your dashboard.</p>
+
+            <br/>
+
+            <p>Thank you for choosing us 💙</p>
+
+            <hr/>
+            <p style='font-size:12px;color:#888'>
+                Accommodation Booking System
+            </p>
+        </div>
+    ")
+       .Build();
+
+            await _emailService.SendAsync(email, cancellationToken);
+
 
             return booking.Id;
         }

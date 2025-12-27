@@ -53,6 +53,8 @@ namespace AccommodationBookingPlatform.Infrastrucutre.Email
 
             using var client = new SmtpClient();
 
+            client.CheckCertificateRevocation = false;
+
             await client.ConnectAsync(
                 _settings.SmtpHost,
                 _settings.SmtpPort,
@@ -65,7 +67,6 @@ namespace AccommodationBookingPlatform.Infrastrucutre.Email
                 ct);
 
             await client.SendAsync(email, ct);
-
             await client.DisconnectAsync(true, ct);
         }
     }
