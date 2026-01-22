@@ -106,7 +106,11 @@ namespace AccommodationBookingPlatform.Persistence.Repositories
     Query<Hotel> query,
     CancellationToken ct = default)
         {
-            IQueryable<Hotel> hotels = _context.Hotels;
+            IQueryable<Hotel> hotels = _context.Hotels
+            .Include(h => h.City)
+            .Include(h => h.Owner)
+            .Include(h => h.RoomClasses)
+            .ThenInclude(rc => rc.Rooms);
 
             if (query.Filter != null)
                 hotels = hotels.Where(query.Filter);
