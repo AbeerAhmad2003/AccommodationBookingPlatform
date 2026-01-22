@@ -23,7 +23,7 @@ namespace AccommodationBookingPlatform.Application.Features.Rooms.Commands.Delet
             if (room is null)
                 throw new NotFoundException(nameof(Room), request.Id);
 
-            if (room.Bookings.Any())
+            if (room.BookingRooms.Any())
                 throw new ConflictException("Cannot delete a room that has bookings.");
 
             await _roomRepository.DeleteAsync(room, cancellationToken);

@@ -21,7 +21,7 @@ namespace AccommodationBookingPlatform.Application.Contracts.Services.Pricing
             if (checkOut <= checkIn)
                 throw new ArgumentException("Checkout must be after Checkin");
 
-            int nights = (checkOut - checkIn).Days;
+            int nights = (checkOut.Date - checkIn.Date).Days;
 
             decimal originalPricePerNight = roomClass.PricePerNight;
 

@@ -31,7 +31,7 @@ namespace AccommodationBookingPlatform.Application.Features.Invoices.Queries.Get
             if (invoice is null)
                 throw new NotFoundException("Invoice", request.BookingId);
 
-            // Security → اليوزر يشوف فاتورته فقط
+            // Security 
             var isAdmin = _currentUser.Role == Domain.Common.Enums.UserRole.Admin;
 
             if (!isAdmin && invoice.UserId != _currentUser.UserId)

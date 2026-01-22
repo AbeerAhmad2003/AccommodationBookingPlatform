@@ -18,9 +18,11 @@ namespace AccommodationBookingPlatform.Persistence.Configurations
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Room ↔ Booking (Many-to-Many)
-            builder.HasMany(r => r.Bookings)
-                .WithMany(b => b.Rooms);
+            builder.HasMany(r => r.BookingRooms)
+    .WithOne(br => br.Room)
+    .HasForeignKey(br => br.RoomId)
+    .IsRequired()
+    .OnDelete(DeleteBehavior.Cascade);
 
             // Room Number
             builder.Property(r => r.Number)

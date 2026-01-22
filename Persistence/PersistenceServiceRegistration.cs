@@ -32,7 +32,7 @@ namespace AccommodationBookingPlatform.Persistence
             services.AddScoped<IInvoiceRepository, InvoiceRepository>();
             services.AddScoped<IDiscountRepository, DiscountRepository>();
 
-            // Supporting Repositories (إذا موجودة)
+            // 
             //services.AddScoped<IImageRepository, ImageRepository>();
             // services.AddScoped<IReviewRepository, ReviewRepository>();
 
