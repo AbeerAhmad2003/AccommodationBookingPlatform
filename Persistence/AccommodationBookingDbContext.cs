@@ -1,5 +1,6 @@
 ﻿using AccommodationBookingPlatform.Domain.Common;
 using AccommodationBookingPlatform.Domain.Entities;
+using AccommodationBookingPlatform.Domain.Entities.AccommodationBookingPlatform.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace AccommodationBookingPlatform.Persistence
@@ -23,6 +24,8 @@ namespace AccommodationBookingPlatform.Persistence
         public DbSet<Discount> Discounts { get; set; }
         public DbSet<InvoiceRecord> InvoiceRecords { get; set; }
         public DbSet<Owner> Owners { get; set; }
+        public DbSet<BookingRoom> BookingRooms { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

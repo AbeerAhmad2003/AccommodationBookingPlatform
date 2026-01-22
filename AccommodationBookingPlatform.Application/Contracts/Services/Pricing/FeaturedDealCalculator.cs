@@ -8,11 +8,11 @@ namespace AccommodationBookingPlatform.Application.Contracts.Services.Pricing
             Hotel hotel,
             DateTime nowUtc)
         {
-            // لو الفندق ما عنده روم كلاس أصلاً
+            // If the hotel has no room classes at all
             if (hotel.RoomClasses == null || !hotel.RoomClasses.Any())
                 return (0, 0);
 
-            // جيبي كل الخصومات الفعّالة حالياً
+            // Collect all currently active discounts across all room classes
             var activeDeals = hotel.RoomClasses
                 .SelectMany(rc =>
                     rc.Discounts != null
@@ -28,14 +28,14 @@ namespace AccommodationBookingPlatform.Application.Contracts.Services.Pricing
                 )
                 .ToList();
 
-            // 🔥 لو ما في خصومات → رجع أقل سعر متوفر بدون خصم
+            // If there are no active discounts, return the lowest available price without discount
             if (!activeDeals.Any())
             {
                 var minPrice = hotel.RoomClasses.Min(rc => rc.PricePerNight);
                 return (minPrice, minPrice);
             }
 
-            // 🔥 غير هيك → رجّع أفضل ديل
+            // Otherwise, return the best deal (lowest discounted price)
             var bestDeal = activeDeals
                 .OrderBy(d => d.Discounted)
                 .First();

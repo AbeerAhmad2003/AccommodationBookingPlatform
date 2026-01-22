@@ -20,7 +20,7 @@ namespace AccommodationBookingPlatform.Persistence.Configurations
 
             // Percentage (0 - 100)
             builder.Property(d => d.Percentage)
-                .HasPrecision(5, 2)   // مثال: 25.50%
+                .HasPrecision(5, 2)
                 .IsRequired();
 
             // Dates

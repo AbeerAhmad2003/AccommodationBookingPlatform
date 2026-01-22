@@ -43,6 +43,20 @@ namespace AccommodationBookingPlatform.Application.Contracts.Persistence
     DateTime to,
     int requestedRooms,
     CancellationToken ct = default);
+        Task<List<Room>> AllocateRoomsAsync(
+    Guid roomClassId,
+    DateTime from,
+    DateTime to,
+    int requestedRooms,
+    CancellationToken ct = default);
+
+        Task AddBookingRoomsAsync(
+            Guid bookingId,
+            IReadOnlyList<Guid> roomIds,
+            CancellationToken ct = default);
+        Task RemoveBookingRoomsAsync(Guid bookingId, CancellationToken ct = default);
+
+
 
     }
 

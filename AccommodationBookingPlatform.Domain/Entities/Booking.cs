@@ -1,5 +1,6 @@
 ﻿using AccommodationBookingPlatform.Domain.Common;
 using AccommodationBookingPlatform.Domain.Common.Enums;
+using AccommodationBookingPlatform.Domain.Entities.AccommodationBookingPlatform.Domain.Entities;
 
 namespace AccommodationBookingPlatform.Domain.Entities
 {
@@ -30,7 +31,7 @@ namespace AccommodationBookingPlatform.Domain.Entities
 
         public decimal TotalPrice { get; set; }
 
-        public ICollection<Room> Rooms { get; set; } = new List<Room>();
+        public ICollection<BookingRoom> BookingRooms { get; set; } = new List<BookingRoom>();
         public ICollection<InvoiceRecord> InvoiceRecords { get; set; } = new List<InvoiceRecord>();
 
         public DateTime CreatedAtUtc { get; set; }

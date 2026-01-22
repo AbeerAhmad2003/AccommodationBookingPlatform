@@ -1,4 +1,5 @@
 ﻿using AccommodationBookingPlatform.Domain.Common;
+using AccommodationBookingPlatform.Domain.Entities.AccommodationBookingPlatform.Domain.Entities;
 
 namespace AccommodationBookingPlatform.Domain.Entities
 {
@@ -7,8 +8,8 @@ namespace AccommodationBookingPlatform.Domain.Entities
         public Guid RoomClassId { get; set; }
         public RoomClass RoomClass { get; set; }
         public string Number { get; set; }
-        public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
-        public ICollection<InvoiceRecord> InvoiceRecords { get; set; } = new List<InvoiceRecord>();
+        public ICollection<BookingRoom> BookingRooms { get; set; } = new List<BookingRoom>();
+        //public ICollection<InvoiceRecord> InvoiceRecords { get; set; } = new List<InvoiceRecord>();
         public DateTime CreatedAtUtc { get; set; }
         public DateTime? ModifiedAtUtc { get; set; }
     }

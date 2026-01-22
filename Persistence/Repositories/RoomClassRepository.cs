@@ -46,7 +46,7 @@ namespace AccommodationBookingPlatform.Persistence.Repositories
             return await _context.RoomClasses
                 .Include(rc => rc.Hotel)
                 .Include(rc => rc.Rooms)
-                .AsNoTracking()
+                .Include(rc => rc.Amenities)
                 .FirstOrDefaultAsync(rc => rc.Id == id, ct);
         }
     }

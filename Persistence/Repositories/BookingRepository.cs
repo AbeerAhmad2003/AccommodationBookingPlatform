@@ -2,6 +2,7 @@
 using AccommodationBookingPlatform.Application.Contracts.Persistence;
 using AccommodationBookingPlatform.Domain.Common;
 using AccommodationBookingPlatform.Domain.Entities;
+using AccommodationBookingPlatform.Domain.Entities.AccommodationBookingPlatform.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace AccommodationBookingPlatform.Persistence.Repositories
@@ -26,19 +27,17 @@ namespace AccommodationBookingPlatform.Persistence.Repositories
         }
 
         public async Task<Booking?> GetByIdWithDetailsAsync(
-       Guid bookingId,
-       CancellationToken ct = default)
+    Guid bookingId,
+    CancellationToken ct = default)
         {
             return await _context.Bookings
                 .Include(b => b.Hotel)
                     .ThenInclude(h => h.City)
-                .Include(b => b.Hotel)
-                    .ThenInclude(h => h.RoomClasses)
-                        .ThenInclude(rc => rc.Discounts)
-                .Include(b => b.Hotel)
-                    .ThenInclude(h => h.RoomClasses)
-                        .ThenInclude(rc => rc.Rooms)
+                .Include(b => b.RoomClass)
+                    .ThenInclude(rc => rc.Discounts)
                 .Include(b => b.InvoiceRecords)
+                .Include(b => b.BookingRooms)
+                    .ThenInclude(br => br.Room)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(b => b.Id == bookingId, ct);
         }
@@ -149,6 +148,39 @@ namespace AccommodationBookingPlatform.Persistence.Repositories
             return distinctBookings;
         }
         public async Task<bool> IsRoomClassAvailableAsync(
+     Guid roomClassId,
+     DateTime from,
+     DateTime to,
+     int requestedRooms,
+     CancellationToken ct = default)
+        {
+            if (from >= to)
+                throw new ArgumentException("Invalid date range.");
+
+            if (requestedRooms <= 0)
+                throw new ArgumentException("Requested rooms must be greater than zero.");
+
+            // Total rooms in this room class
+            var totalRooms = await _context.Rooms
+                .CountAsync(r => r.RoomClassId == roomClassId, ct);
+
+            // Count of DISTINCT rooms already booked in the overlapping period (source of truth = BookingRooms)
+            var bookedRooms = await _context.BookingRooms
+                .Where(br =>
+                    br.Room.RoomClassId == roomClassId &&
+                    br.Booking.CheckInDate < to &&
+                    br.Booking.CheckOutDate > from
+                )
+                .Select(br => br.RoomId)
+                .Distinct()
+                .CountAsync(ct);
+
+            var availableRooms = totalRooms - bookedRooms;
+
+            return availableRooms >= requestedRooms;
+        }
+
+        public async Task<List<Room>> AllocateRoomsAsync(
     Guid roomClassId,
     DateTime from,
     DateTime to,
@@ -158,23 +190,48 @@ namespace AccommodationBookingPlatform.Persistence.Repositories
             if (from >= to)
                 throw new ArgumentException("Invalid date range.");
 
-            // total rooms in this room class only
-            var totalRooms = await _context.Rooms
-                .CountAsync(r => r.RoomClassId == roomClassId, ct);
+            var rooms = await _context.Rooms
+                .Where(r => r.RoomClassId == roomClassId)
+                .Where(r => !_context.BookingRooms.Any(br =>
+                    br.RoomId == r.Id &&
+                    br.Booking.CheckInDate < to &&
+                    br.Booking.CheckOutDate > from
+                ))
+                .OrderBy(r => r.Number)
+                .Take(requestedRooms)
+                .ToListAsync(ct);
 
-            // booked rooms in this room class in overlapping period
-            var bookedRooms = await _context.Bookings
-                .Where(b =>
-                    b.RoomClassId == roomClassId &&
-                    b.CheckInDate < to &&
-                    b.CheckOutDate > from
-                )
-                .SumAsync(b => b.RoomsCount, ct);
-
-            var availableRooms = totalRooms - bookedRooms;
-
-            return availableRooms >= requestedRooms;
+            return rooms;
         }
+
+        public async Task AddBookingRoomsAsync(
+     Guid bookingId,
+     IReadOnlyList<Guid> roomIds,
+     CancellationToken ct = default)
+        {
+            var links = roomIds.Select(roomId => new BookingRoom
+            {
+                BookingId = bookingId,
+                RoomId = roomId,
+                CreatedAtUtc = DateTime.UtcNow
+            });
+
+            _context.BookingRooms.AddRange(links);
+            await _context.SaveChangesAsync(ct);
+        }
+        public async Task RemoveBookingRoomsAsync(Guid bookingId, CancellationToken ct = default)
+        {
+            var links = await _context.BookingRooms
+                .Where(br => br.BookingId == bookingId)
+                .ToListAsync(ct);
+
+            if (links.Count == 0)
+                return;
+
+            _context.BookingRooms.RemoveRange(links);
+            await _context.SaveChangesAsync(ct);
+        }
+
 
     }
 

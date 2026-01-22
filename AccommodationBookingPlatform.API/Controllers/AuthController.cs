@@ -52,6 +52,7 @@ namespace AccommodationBookingPlatform.API.Controllers
 
             return Ok(result);   // LoginResponse from Application
         }
+
     }
 }
 

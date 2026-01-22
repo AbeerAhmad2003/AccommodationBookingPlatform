@@ -33,6 +33,27 @@ namespace AccommodationBookingPlatform.Application.Profiles
      .ForMember(d => d.RoomClassId,
          opt => opt.MapFrom(s => s.RoomClassId));
 
+            CreateMap<Booking, BookingDetailsDto>()
+    .ForMember(d => d.HotelName,
+        opt => opt.MapFrom(s => s.Hotel.Name))
+    .ForMember(d => d.City,
+        opt => opt.MapFrom(s => s.Hotel.City.Name))
+    .ForMember(d => d.CheckInDate,
+        opt => opt.MapFrom(s => s.CheckInDate))
+    .ForMember(d => d.CheckOutDate,
+        opt => opt.MapFrom(s => s.CheckOutDate))
+    .ForMember(d => d.PaymentMethod,
+        opt => opt.MapFrom(s => s.PaymentMethod.ToString()))
+    .ForMember(d => d.Invoice,
+        opt => opt.MapFrom(s => s.InvoiceRecords
+            .OrderByDescending(i => i.CreatedAtUtc)
+            .FirstOrDefault()))
+    .ForMember(d => d.AllocatedRoomNumbers,
+        opt => opt.MapFrom(s => s.BookingRooms
+            .Select(br => br.Room.Number)
+            .OrderBy(n => n)
+            .ToList()));
+
         }
     }
 }

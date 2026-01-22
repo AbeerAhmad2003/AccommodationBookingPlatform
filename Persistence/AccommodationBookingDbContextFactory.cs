@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 
-
 namespace AccommodationBookingPlatform.Persistence
 {
     public class AccommodationBookingDbContextFactory
@@ -10,7 +9,7 @@ namespace AccommodationBookingPlatform.Persistence
     {
         public AccommodationBookingDbContext CreateDbContext(string[] args)
         {
-            // نقرأ appsettings.json من مشروع الـ API
+
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(Path.Combine(Directory.GetCurrentDirectory(), "../AccommodationBookingPlatform.API"))
                 .AddJsonFile("appsettings.json")
